@@ -1,0 +1,633 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.quirk.systems/classification-decision/1-0-0.schema.json",
+  "title": "Quirk Classification Decision",
+  "description": "Candidate transport contract for independently versioned classification axes, evidence, controls, provenance, and history.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "decision_id",
+    "object_ref",
+    "classification_version",
+    "revision",
+    "change_mode",
+    "recorded_at",
+    "effective_time",
+    "axes",
+    "intended_effects",
+    "result_claims",
+    "provenance",
+    "controls",
+    "tags",
+    "interpretation_basis",
+    "history"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "decision_id": {
+      "type": "string",
+      "pattern": "^classification\\.decision\\.[a-z0-9][a-z0-9._-]*$"
+    },
+    "object_ref": {
+      "$ref": "#/$defs/ObjectReference"
+    },
+    "classification_version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?$"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "change_mode": {
+      "enum": ["initial", "supersession", "correction", "disposition"]
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "effective_time": {
+      "$ref": "#/$defs/EffectiveTime"
+    },
+    "axes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity", "purpose", "style", "state", "authority"],
+      "properties": {
+        "identity": {
+          "allOf": [
+            { "$ref": "#/$defs/AxisRecord" },
+            { "properties": { "axis": { "const": "identity" } } }
+          ]
+        },
+        "purpose": {
+          "allOf": [
+            { "$ref": "#/$defs/AxisRecord" },
+            { "properties": { "axis": { "const": "purpose" } } }
+          ]
+        },
+        "style": {
+          "allOf": [
+            { "$ref": "#/$defs/AxisRecord" },
+            { "properties": { "axis": { "const": "style" } } }
+          ]
+        },
+        "state": {
+          "allOf": [
+            { "$ref": "#/$defs/AxisRecord" },
+            { "properties": { "axis": { "const": "state" } } }
+          ]
+        },
+        "authority": {
+          "allOf": [
+            { "$ref": "#/$defs/AxisRecord" },
+            { "properties": { "axis": { "const": "authority" } } }
+          ]
+        }
+      }
+    },
+    "intended_effects": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/IntendedEffect"
+      }
+    },
+    "result_claims": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ResultClaim"
+      }
+    },
+    "provenance": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/ProvenanceRecord"
+      }
+    },
+    "imports": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/ImportedTermMapping"
+      }
+    },
+    "controls": {
+      "$ref": "#/$defs/ControlReferences"
+    },
+    "tags": {
+      "description": "Discovery and display annotations only. Consumers MUST NOT use these values as control inputs.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "interpretation_basis": {
+      "$ref": "#/$defs/InterpretationBasis"
+    },
+    "history": {
+      "$ref": "#/$defs/History"
+    },
+    "exclusivity_policies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ExclusivityPolicy"
+      }
+    },
+    "exception_refs": {
+      "$ref": "#/$defs/ReferenceArray"
+    },
+    "proposed_move_ref": {
+      "$ref": "#/$defs/Reference"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "revision": { "minimum": 2 }
+        },
+        "required": ["revision"]
+      },
+      "then": {
+        "properties": {
+          "change_mode": {
+            "enum": ["supersession", "correction", "disposition"]
+          },
+          "history": {
+            "properties": {
+              "supersedes_decision_refs": { "minItems": 1 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "change_mode": {
+            "enum": ["supersession", "correction"]
+          }
+        },
+        "required": ["change_mode"]
+      },
+      "then": {
+        "properties": {
+          "history": {
+            "required": ["supersession_reason"],
+            "properties": {
+              "supersedes_decision_refs": { "minItems": 1 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "provenance": {
+            "contains": {
+              "properties": { "origin": { "const": "imported" } },
+              "required": ["origin"]
+            }
+          }
+        }
+      },
+      "then": {
+        "required": ["imports"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "axes": {
+            "anyOf": [
+              { "properties": { "identity": { "properties": { "resolution": { "enum": ["novel", "ambiguous", "conflicting"] } } } } },
+              { "properties": { "purpose": { "properties": { "resolution": { "enum": ["novel", "ambiguous", "conflicting"] } } } } },
+              { "properties": { "style": { "properties": { "resolution": { "enum": ["novel", "ambiguous", "conflicting"] } } } } },
+              { "properties": { "state": { "properties": { "resolution": { "enum": ["novel", "ambiguous", "conflicting"] } } } } },
+              { "properties": { "authority": { "properties": { "resolution": { "enum": ["novel", "ambiguous", "conflicting"] } } } } }
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": ["proposed_move_ref"]
+      }
+    }
+  ],
+  "$defs": {
+    "Reference": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 512
+    },
+    "ReferenceArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/Reference"
+      }
+    },
+    "NonEmptyReferenceArray": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/Reference"
+      }
+    },
+    "ObjectReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["object_id", "object_version"],
+      "properties": {
+        "object_id": {
+          "$ref": "#/$defs/Reference"
+        },
+        "object_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "EffectiveTime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["valid_from"],
+      "properties": {
+        "valid_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_until": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    },
+    "AxisRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["axis", "resolution", "values", "candidate_values", "evidence_refs", "rationale"],
+      "properties": {
+        "axis": {
+          "enum": ["identity", "purpose", "style", "state", "authority"]
+        },
+        "resolution": {
+          "enum": [
+            "classified",
+            "unknown",
+            "unclassified",
+            "novel",
+            "not_applicable",
+            "withheld",
+            "redacted",
+            "not_collected",
+            "unavailable",
+            "invalid",
+            "ambiguous",
+            "conflicting",
+            "error"
+          ]
+        },
+        "values": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/Reference"
+          }
+        },
+        "candidate_values": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/Reference"
+          }
+        },
+        "evidence_refs": {
+          "$ref": "#/$defs/ReferenceArray"
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vocabulary_ref": {
+          "$ref": "#/$defs/Reference"
+        },
+        "raw_value": {
+          "type": ["string", "number", "boolean", "null"]
+        },
+        "applicability_policy_ref": {
+          "$ref": "#/$defs/Reference"
+        },
+        "taxonomy_version_ref": {
+          "$ref": "#/$defs/Reference"
+        },
+        "mismatch_evidence_refs": {
+          "$ref": "#/$defs/NonEmptyReferenceArray"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "resolution": { "const": "classified" } },
+            "required": ["resolution"]
+          },
+          "then": {
+            "properties": { "values": { "minItems": 1 } },
+            "required": ["vocabulary_ref"]
+          },
+          "else": {
+            "properties": { "values": { "maxItems": 0 } }
+          }
+        },
+        {
+          "if": {
+            "properties": { "resolution": { "const": "novel" } },
+            "required": ["resolution"]
+          },
+          "then": {
+            "required": ["taxonomy_version_ref", "mismatch_evidence_refs"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "resolution": { "const": "not_applicable" } },
+            "required": ["resolution"]
+          },
+          "then": {
+            "required": ["applicability_policy_ref"]
+          }
+        }
+      ]
+    },
+    "IntendedEffect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["effect_id", "description", "success_measure_refs", "provenance_refs"],
+      "properties": {
+        "effect_id": {
+          "$ref": "#/$defs/Reference"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "success_measure_refs": {
+          "$ref": "#/$defs/NonEmptyReferenceArray"
+        },
+        "provenance_refs": {
+          "$ref": "#/$defs/NonEmptyReferenceArray"
+        }
+      }
+    },
+    "ResultClaim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["claim_id", "effect_id", "claim_kind", "description", "method_ref", "evidence_refs", "provenance_refs"],
+      "properties": {
+        "claim_id": {
+          "$ref": "#/$defs/Reference"
+        },
+        "effect_id": {
+          "$ref": "#/$defs/Reference"
+        },
+        "claim_kind": {
+          "enum": ["predicted", "simulated", "reported", "measured", "inferred", "causally_attributed"]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "method_ref": {
+          "$ref": "#/$defs/Reference"
+        },
+        "evidence_refs": {
+          "$ref": "#/$defs/NonEmptyReferenceArray"
+        },
+        "provenance_refs": {
+          "$ref": "#/$defs/NonEmptyReferenceArray"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "causal_basis_refs": {
+          "$ref": "#/$defs/NonEmptyReferenceArray"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "claim_kind": { "enum": ["measured", "causally_attributed"] } },
+            "required": ["claim_kind"]
+          },
+          "then": {
+            "required": ["observed_at"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "claim_kind": { "const": "causally_attributed" } },
+            "required": ["claim_kind"]
+          },
+          "then": {
+            "required": ["causal_basis_refs"]
+          }
+        }
+      ]
+    },
+    "ProvenanceRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provenance_id", "origin", "source_ref", "captured_at", "digest", "actor_ref", "authority_ref"],
+      "properties": {
+        "provenance_id": {
+          "$ref": "#/$defs/Reference"
+        },
+        "origin": {
+          "enum": ["direct_human", "generated", "derived", "imported", "migration"]
+        },
+        "source_ref": {
+          "$ref": "#/$defs/Reference"
+        },
+        "source_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "captured_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "actor_ref": {
+          "$ref": "#/$defs/Reference"
+        },
+        "authority_ref": {
+          "$ref": "#/$defs/Reference"
+        },
+        "transform_refs": {
+          "$ref": "#/$defs/ReferenceArray"
+        }
+      }
+    },
+    "ImportedTermMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_term", "source_namespace", "source_version", "source_ref", "use_basis_ref", "relation", "mapping_status", "semantic_delta", "collision_refs"],
+      "properties": {
+        "source_term": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ref": {
+          "$ref": "#/$defs/Reference"
+        },
+        "use_basis_ref": {
+          "$ref": "#/$defs/Reference"
+        },
+        "relation": {
+          "enum": ["exact_match", "close_match", "broader_than", "narrower_than", "overlaps", "related_to", "conflicts_with", "unmapped"]
+        },
+        "mapping_status": {
+          "enum": ["candidate", "approved", "rejected", "unmapped"]
+        },
+        "target_concept_ref": {
+          "$ref": "#/$defs/Reference"
+        },
+        "mapping_decision_ref": {
+          "$ref": "#/$defs/Reference"
+        },
+        "semantic_delta": {
+          "type": "string",
+          "minLength": 1
+        },
+        "collision_refs": {
+          "$ref": "#/$defs/ReferenceArray"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "mapping_status": { "const": "approved" } },
+            "required": ["mapping_status"]
+          },
+          "then": {
+            "required": ["target_concept_ref", "mapping_decision_ref"]
+          }
+        }
+      ]
+    },
+    "ControlReferences": {
+      "description": "Typed policy references; tag values are structurally excluded.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["permissions", "routing", "retention", "release"],
+      "properties": {
+        "permissions": { "$ref": "#/$defs/ReferenceArray" },
+        "routing": { "$ref": "#/$defs/ReferenceArray" },
+        "retention": { "$ref": "#/$defs/ReferenceArray" },
+        "release": { "$ref": "#/$defs/ReferenceArray" }
+      }
+    },
+    "InterpretationBasis": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "definition_refs": { "$ref": "#/$defs/ReferenceArray" },
+        "schema_refs": { "$ref": "#/$defs/ReferenceArray" },
+        "policy_refs": { "$ref": "#/$defs/ReferenceArray" },
+        "decision_refs": { "$ref": "#/$defs/ReferenceArray" },
+        "precedent_refs": { "$ref": "#/$defs/ReferenceArray" },
+        "procedure_refs": { "$ref": "#/$defs/ReferenceArray" }
+      }
+    },
+    "DecisionReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision_id", "revision", "digest", "recorded_at"],
+      "properties": {
+        "decision_id": {
+          "type": "string",
+          "pattern": "^classification\\.decision\\.[a-z0-9][a-z0-9._-]*$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "History": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_mode", "supersedes_decision_refs", "decision_log_ref", "retention_policy_ref"],
+      "properties": {
+        "record_mode": {
+          "const": "append_only"
+        },
+        "supersedes_decision_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/DecisionReference"
+          }
+        },
+        "supersession_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision_log_ref": {
+          "$ref": "#/$defs/Reference"
+        },
+        "retention_policy_ref": {
+          "$ref": "#/$defs/Reference"
+        },
+        "disposition_event_refs": {
+          "$ref": "#/$defs/ReferenceArray"
+        }
+      }
+    },
+    "ExclusivityPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_id", "axis", "scope_ref", "invariant_kind", "prevented_harm", "authority_ref", "evidence_refs", "conflict_behavior", "review_at"],
+      "properties": {
+        "policy_id": { "$ref": "#/$defs/Reference" },
+        "axis": { "enum": ["identity", "purpose", "style", "state", "authority"] },
+        "scope_ref": { "$ref": "#/$defs/Reference" },
+        "invariant_kind": { "enum": ["logical_disjointness", "temporal_cardinality", "protocol_determinism", "accounting_integrity", "safety_constraint"] },
+        "prevented_harm": { "type": "string", "minLength": 1 },
+        "authority_ref": { "$ref": "#/$defs/Reference" },
+        "evidence_refs": { "$ref": "#/$defs/NonEmptyReferenceArray" },
+        "conflict_behavior": { "enum": ["reject", "fail_closed", "queue_review"] },
+        "review_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}
