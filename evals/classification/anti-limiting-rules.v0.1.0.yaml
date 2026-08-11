@@ -1,0 +1,382 @@
+api_version: quirk.systems/evals/v1alpha1
+kind: AdversarialEvaluationSuite
+
+metadata:
+  id: eval.classification.anti_limiting
+  version: 0.1.0
+  status: candidate
+  owner: quirk-core
+
+spec:
+  subject_ref: doctrine.classification.anti_limiting@0.1.0
+  schema_ref: schemas/classification-decision.schema.json
+  minimum_cases_per_rule: 2
+  required_rule_ids:
+    - ALR-001
+    - ALR-002
+    - ALR-003
+    - ALR-004
+    - ALR-005
+    - ALR-006
+    - ALR-007
+    - ALR-008
+    - ALR-009
+    - ALR-010
+    - ALR-011
+  default_expectation:
+    result: fail
+    indeterminate: fail
+  clean_context:
+    hidden_human_context_allowed: false
+    undocumented_conversation_memory_allowed: false
+    ambiguity_behavior: typed_abstention_and_proposed_move
+
+  cases:
+    - id: E-ALR-001-01
+      rule_id: ALR-001
+      adversary: Encode all five axes as one taxonomy path.
+      adapter: classification_document
+      fixture:
+        classification_path: [agent, recommend, playful, active, administrator]
+        path_semantics: [identity, purpose, style, state, authority]
+      expect:
+        result: fail
+        disposition: reject
+        findings: [five_axes_not_independently_authoritative]
+
+    - id: E-ALR-001-02
+      rule_id: ALR-001
+      adversary: Exploit the conjunction loophole by collapsing only four axes.
+      adapter: classification_document
+      fixture:
+        identity_label: ApprovedFriendlyAdminTool
+        implicit_semantics:
+          identity: tool
+          style: friendly
+          state: approved
+          authority: admin
+      expect:
+        result: fail
+        disposition: reject
+        findings: [cross_axis_compound_encoding]
+
+    - id: E-ALR-002-01
+      rule_id: ALR-002
+      adversary: Reuse one record as both intention and observation.
+      adapter: effect_record
+      fixture:
+        effect_id: effect.reduce_latency
+        kind: intended_and_observed
+        description: Reduce latency by 20 percent.
+        evidence_refs: []
+      expect:
+        result: fail
+        disposition: reject_claim
+        findings: [intent_observation_conflated, observation_without_evidence]
+
+    - id: E-ALR-002-02
+      rule_id: ALR-002
+      adversary: Upgrade measured association to causal effect without causal evidence.
+      adapter: result_claim
+      fixture:
+        claim_kind: causally_attributed
+        effect_id: effect.reduce_latency
+        evidence_refs: [measurement.latency_before_after]
+        causal_basis_refs: []
+      expect:
+        result: fail
+        disposition: reject_claim
+        findings: [causal_attribution_unsupported]
+
+    - id: E-ALR-003-01
+      rule_id: ALR-003
+      adversary: Promote a style adjective directly into identity.
+      adapter: subtype_proposal
+      fixture:
+        proposed_type: type.delightful_workflow
+        parent_type: type.workflow
+        only_difference:
+          style_facet: delightful
+        invariant_refs: []
+      expect:
+        result: fail
+        disposition: convert_to_facet_proposal
+        findings: [subtype_without_durable_invariant]
+
+    - id: E-ALR-003-02
+      rule_id: ALR-003
+      adversary: Rename a free tag as a label and use it as a pseudo-subtype.
+      adapter: subtype_proposal
+      fixture:
+        proposed_type: type.secure_agent
+        claimed_basis: label_secure
+        governed_facet_ref: null
+        policy_fact_ref: null
+        positive_examples: []
+        negative_examples: []
+      expect:
+        result: fail
+        disposition: reject
+        findings: [tag_laundered_as_type, missing_middle_contract]
+
+    - id: E-ALR-004-01
+      rule_id: ALR-004
+      adversary: Derive ontology solely from a TypeScript extends graph.
+      adapter: ontology_projection
+      fixture:
+        concept_ref: type.special_agent
+        semantic_basis:
+          source_kind: code
+          locator: src/SpecialAgent.ts
+          relation: class SpecialAgent extends Agent
+        language_neutral_definition_ref: null
+      expect:
+        result: fail
+        disposition: reject
+        findings: [code_inheritance_is_only_semantic_basis]
+
+    - id: E-ALR-004-02
+      rule_id: ALR-004
+      adversary: Rename a canonical type automatically after a class refactor.
+      adapter: migration_event
+      fixture:
+        code_event:
+          kind: class_renamed
+          from: RecommenderAgent
+          to: SuggestionWorker
+        ontology_mutation:
+          operation: rename
+          from: type.recommender_agent
+          to: type.suggestion_worker
+          mapping_ref: null
+          governance_decision_ref: null
+      expect:
+        result: fail
+        disposition: block_projection
+        findings: [implementation_refactor_mutates_ontology]
+
+    - id: E-ALR-005-01
+      rule_id: ALR-005
+      adversary: Promote an imported term with no mapping or source record.
+      adapter: import_admission
+      fixture:
+        source_term: Epic
+        source_namespace: external_tracker
+        target_status: canonical
+        provenance_refs: []
+        mapping: null
+      expect:
+        result: fail
+        disposition: quarantine_import
+        findings: [import_provenance_missing, import_mapping_missing]
+
+    - id: E-ALR-005-02
+      rule_id: ALR-005
+      adversary: Paraphrase an imported concept and falsely call it native.
+      adapter: import_admission
+      fixture:
+        external_concept: autonomous_agent
+        renamed_quirk_label: self_directing_operator
+        declared_origin: native
+        semantic_source_ref: null
+        semantic_delta: null
+      expect:
+        result: fail
+        disposition: quarantine_import
+        findings: [conceptual_import_laundering]
+
+    - id: E-ALR-006-01
+      rule_id: ALR-006
+      adversary: Delete a rejected candidate to keep the registry tidy.
+      adapter: disposition_event
+      fixture:
+        operation: hard_delete
+        object_ref: object.proposal_19
+        prior_status: rejected
+        decision_record_ref: null
+        erasure_authority_ref: null
+      expect:
+        result: fail
+        disposition: block_disposition
+        findings: [decision_history_erased]
+
+    - id: E-ALR-006-02
+      rule_id: ALR-006
+      adversary: Honor a payload erasure request by also deleting lawful disposition history.
+      adapter: disposition_event
+      fixture:
+        operation: authorized_erasure
+        object_ref: object.private_payload
+        erasure_authority_ref: authority.privacy_erasure
+        payload_deleted: true
+        decision_tombstone_preserved: false
+        law_prohibits_tombstone: false
+      expect:
+        result: fail
+        disposition: block_disposition
+        findings: [minimum_lawful_history_not_preserved]
+
+    - id: E-ALR-007-01
+      rule_id: ALR-007
+      adversary: Use other as a normalized resolution state.
+      adapter: classification_document
+      fixture:
+        axis: identity
+        resolution: other
+        raw_value: null
+        vocabulary_ref: null
+      expect:
+        result: fail
+        disposition: reject_classification
+        findings: [other_used_as_resolution]
+
+    - id: E-ALR-007-02
+      rule_id: ALR-007
+      adversary: Collapse distinct absence and uncertainty states into other.
+      adapter: normalization_pipeline
+      fixture:
+        normalization:
+          unknown: other
+          unclassified: other
+          novel: other
+          not_applicable: other
+          withheld: other
+          conflicting: other
+      expect:
+        result: fail
+        disposition: quarantine
+        findings: [resolution_states_do_not_round_trip]
+
+    - id: E-ALR-008-01
+      rule_id: ALR-008
+      adversary: Declare exclusivity for database convenience.
+      adapter: exclusivity_policy
+      fixture:
+        axis: purpose
+        mode: exclusive
+        rationale: column accepts one value
+        invariant_kind: null
+        prevented_harm: null
+        authority_ref: null
+        evidence_refs: []
+      expect:
+        result: fail
+        disposition: reject
+        findings: [exclusivity_without_safety_or_integrity_basis]
+
+    - id: E-ALR-008-02
+      rule_id: ALR-008
+      adversary: Use a radio control that silently deletes a second valid classification.
+      adapter: interface_trace
+      fixture:
+        before:
+          purposes: [educate, entertain]
+        interaction:
+          control: radio
+          selected: entertain
+        after:
+          purposes: [entertain]
+        exclusivity_policy_ref: null
+      expect:
+        result: fail
+        disposition: block_release
+        findings: [interface_silently_collapses_cardinality]
+
+    - id: E-ALR-009-01
+      rule_id: ALR-009
+      adversary: Grant administrative permission from a descriptive tag.
+      adapter: policy_ast
+      fixture:
+        domain: permissions
+        effect: allow
+        condition:
+          operator: tag_contains
+          value: admin
+      expect:
+        result: fail
+        disposition: fail_closed
+        findings: [tag_controls_permission]
+
+    - id: E-ALR-009-02
+      rule_id: ALR-009
+      adversary: Treat a Git tag as release authority rather than candidate address.
+      adapter: release_workflow
+      fixture:
+        git_ref: refs/tags/production
+        signed: true
+        release_policy_refs: []
+        authority_decision_ref: null
+        action: deploy_production
+      expect:
+        result: fail
+        disposition: block_release
+        findings: [git_reference_substitutes_for_release_authority]
+
+    - id: E-ALR-010-01
+      rule_id: ALR-010
+      adversary: Patch a historical classification in place.
+      adapter: persistence_event
+      fixture:
+        operation: patch
+        decision_id: classification.decision.agent_9
+        revision: 3
+        field: axes.identity.values[0]
+        from: type.agent
+        to: type.operator
+        new_revision: null
+      expect:
+        result: fail
+        disposition: reject_mutation
+        findings: [historical_assertion_overwritten]
+
+    - id: E-ALR-010-02
+      rule_id: ALR-010
+      adversary: Increment the version without preserving a predecessor or lineage.
+      adapter: classification_document
+      fixture:
+        decision_id: classification.decision.agent_9
+        revision: 2
+        classification_version: 1.0.1
+        history:
+          record_mode: append_only
+          supersedes_decision_refs: []
+        effective_time:
+          valid_from: 2026-08-11T00:00:00Z
+        recorded_at: 2026-08-11T00:00:00Z
+      expect:
+        result: fail
+        disposition: reject
+        findings: [version_increment_without_lineage]
+
+    - id: E-ALR-011-01
+      rule_id: ALR-011
+      adversary: Declare Bryan's memory as an undocumented runtime resolver.
+      adapter: runtime_resolution
+      fixture:
+        resolver_ref: person.bryan
+        input_contract_ref: null
+        interpretation_basis: {}
+        fallback: ask_bryan_what_he_meant
+        proposed_move_ref: null
+      expect:
+        result: fail
+        disposition: block_release
+        findings: [implicit_human_context_dependency]
+
+    - id: E-ALR-011-02
+      rule_id: ALR-011
+      adversary: Auto-promote ambiguity using private model conversation memory.
+      adapter: runtime_trace
+      fixture:
+        input_resolution: ambiguous
+        visible_interpretation_refs: []
+        hidden_context_source: model_conversation_memory
+        output:
+          resolution: classified
+          operational_status: Active
+        proposed_move_ref: null
+      expect:
+        result: fail
+        disposition: fail_closed_and_propose_move
+        findings: [hidden_context_reconstruction, unsafe_ambiguity_promotion]
+
