@@ -1,20 +1,22 @@
 ---
 id: doctrine.classification.anti_limiting
 object_type: CandidateDoctrine
-version: 0.1.0
+version: 0.2.0
 status: candidate
 operational_authority: none
 proposed_on: 2026-08-11
 proposed_by: Bryan
 owner: Quirk Core
 scope: all classification-bearing Quirk objects, schemas, imports, APIs, agents, interfaces, and projections
-supersedes: []
+supersedes:
+  - doctrine.classification.anti_limiting@0.1.0
+revision_decision_ref: admission.decision.doctrine.classification.anti_limiting.revise.0001
 source_kind: direct_human_proposal
 ---
 
-# Eleven Anti-Limiting Rules
+# Eleven Anti-Limiting Rules v0.2.0
 
-**Candidate classification doctrine for Quirk Core**
+**Revised candidate classification doctrine for Quirk Core**
 
 > Open ontology. Closed operational admission. Preserve expressive range
 > without allowing ambiguity to impersonate authority.
@@ -483,4 +485,17 @@ the adversarial suite, explain every decision from inspectable records, and
 reach the same control outcome without access to Bryan's unrecorded intent.
 
 Bryan may decide. Runtime must carry the decision—not reconstruct Bryan.
+
+
+
+## Revision evidence
+
+Version 0.2.0 preserves all eleven source statements verbatim while revising
+their proof machinery. The revision is governed by
+`admission.decision.doctrine.classification.anti_limiting.revise.0001` and
+supersedes candidate version 0.1.0 without granting runtime authority.
+
+The candidate remains `shadow_only` and `none_until_admitted`. Passing its
+validation harness proves contract consistency and expected evaluator behavior;
+it does not approve, canonize, release, or activate the doctrine.
 

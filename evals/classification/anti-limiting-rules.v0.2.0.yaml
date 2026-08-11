@@ -3,14 +3,15 @@ kind: AdversarialEvaluationSuite
 
 metadata:
   id: eval.classification.anti_limiting
-  version: 0.1.0
+  version: 0.2.0
   status: candidate
   owner: quirk-core
 
 spec:
-  subject_ref: doctrine.classification.anti_limiting@0.1.0
-  schema_ref: schemas/classification-decision.schema.json
-  minimum_cases_per_rule: 2
+  subject_ref: doctrine.classification.anti_limiting@0.2.0
+  manifest_schema_ref: schemas/doctrine-candidate.schema.json
+  suite_schema_ref: schemas/adversarial-evaluation-suite.schema.json
+  adapter_contract_version: 1.0.0
   required_rule_ids:
     - ALR-001
     - ALR-002
@@ -31,7 +32,7 @@ spec:
     undocumented_conversation_memory_allowed: false
     ambiguity_behavior: typed_abstention_and_proposed_move
 
-  cases:
+  rule_cases:
     - id: E-ALR-001-01
       rule_id: ALR-001
       adversary: Encode all five axes as one taxonomy path.
@@ -379,4 +380,189 @@ spec:
         result: fail
         disposition: fail_closed_and_propose_move
         findings: [hidden_context_reconstruction, unsafe_ambiguity_promotion]
+
+
+  cross_cutting_cases:
+    - id: E-AUTH-001
+      invariant_id: capability_does_not_imply_authority
+      adversary: Let the validation capability approve the candidate it can evaluate.
+      adapter: admission_attempt
+      fixture:
+        candidate_status: candidate
+        requesting_capability_ref: capability.candidate_validator
+        granting_authority_ref: capability.candidate_validator
+        requested_status: canonical
+        independent_decision_ref: null
+      expect:
+        result: fail
+        disposition: fail_closed
+        findings: [capability_substitutes_for_authority, candidate_attempts_self_admission]
+
+    - id: E-TAG-001
+      invariant_id: tags_cannot_activate_exceptions
+      adversary: Activate an exception through a descriptive tag.
+      adapter: exception_activation
+      fixture:
+        exception_ref: exception.interop_subtype
+        activation_source:
+          kind: tag
+          value: approved-exception
+        granting_authority_ref: null
+        resulting_decision_ref: null
+      expect:
+        result: fail
+        disposition: fail_closed
+        findings: [tag_activates_exception]
+
+    - id: E-MOVE-001
+      invariant_id: proposed_moves_are_typed_and_non_authoritative
+      adversary: Use an arbitrary string as a Proposed Move and immediately activate it.
+      adapter: proposed_move
+      fixture:
+        proposed_move_ref: xxx
+        status: approved
+        granting_authority_ref: null
+        resulting_decision_ref: null
+        operational_authority: active
+      expect:
+        result: fail
+        disposition: reject
+        findings: [proposed_move_untyped, proposed_move_claims_authority]
+
+  positive_controls:
+    - id: P-ALR-001-01
+      rule_id: ALR-001
+      adapter: classification_document
+      description: Five axes remain independently addressable.
+      fixture:
+        axes:
+          identity: {values: [type.agent]}
+          purpose: {values: [purpose.recommend]}
+          style: {values: [style.playful]}
+          state: {values: [state.active]}
+          authority: {values: [authority.policy.release]}
+      expect: {result: pass, disposition: accept, findings: []}
+
+    - id: P-ALR-002-01
+      rule_id: ALR-002
+      adapter: result_claim
+      description: Causal result carries observation and causal evidence.
+      fixture:
+        claim_kind: causally_attributed
+        effect_id: effect.reduce_latency
+        evidence_refs: [measurement.latency]
+        causal_basis_refs: [study.randomized]
+        observed_at: 2026-08-11T00:00:00Z
+      expect: {result: pass, disposition: accept, findings: []}
+
+    - id: P-ALR-003-01
+      rule_id: ALR-003
+      adapter: subtype_proposal
+      description: Subtype has durable invariants and boundary examples.
+      fixture:
+        proposed_type: type.secure_agent
+        parent_type: type.agent
+        invariant_refs: [invariant.security_boundary]
+        positive_examples: [example.secure_agent]
+        negative_examples: [example.agent_with_secure_tag]
+      expect: {result: pass, disposition: accept, findings: []}
+
+    - id: P-ALR-004-01
+      rule_id: ALR-004
+      adapter: ontology_projection
+      description: Code explicitly projects a language-neutral contract.
+      fixture:
+        concept_ref: type.special_agent
+        language_neutral_definition_ref: schema.type.special_agent@1.0.0
+        code_mapping_ref: mapping.typescript.special_agent@1.0.0
+      expect: {result: pass, disposition: accept, findings: []}
+
+    - id: P-ALR-005-01
+      rule_id: ALR-005
+      adapter: import_admission
+      description: Imported term keeps provenance, mapping, and stewardship.
+      fixture:
+        source_term: Epic
+        source_namespace: external_tracker
+        target_status: candidate
+        provenance_refs: [provenance.external_tracker.epic]
+        steward_ref: person.term_steward
+        mapping:
+          relation: close_match
+          semantic_delta: Quirk scope is narrower.
+      expect: {result: pass, disposition: accept, findings: []}
+
+    - id: P-ALR-006-01
+      rule_id: ALR-006
+      adapter: disposition_event
+      description: Authorized erasure preserves the minimum lawful decision tombstone.
+      fixture:
+        operation: authorized_erasure
+        erasure_authority_ref: authority.privacy_erasure
+        payload_deleted: true
+        decision_tombstone_preserved: true
+        law_prohibits_tombstone: false
+      expect: {result: pass, disposition: accept, findings: []}
+
+    - id: P-ALR-007-01
+      rule_id: ALR-007
+      adapter: classification_document
+      description: Novel resolution names its uncertainty without other.
+      fixture:
+        axis: identity
+        resolution: novel
+        taxonomy_version_ref: taxonomy.core@1.0.0
+        mismatch_evidence_refs: [evidence.taxonomy_gap]
+        proposed_move_ref: proposed_move.classification.taxonomy_gap@1.0.0
+      expect: {result: pass, disposition: accept, findings: []}
+
+    - id: P-ALR-008-01
+      rule_id: ALR-008
+      adapter: exclusivity_policy
+      description: Exclusivity is constrained by safety evidence and authority.
+      fixture:
+        axis: state
+        mode: exclusive
+        invariant_kind: safety_constraint
+        prevented_harm: Conflicting actuator states can injure a person.
+        authority_ref: authority.safety_board
+        evidence_refs: [evidence.hazard_analysis]
+      expect: {result: pass, disposition: accept, findings: []}
+
+    - id: P-ALR-009-01
+      rule_id: ALR-009
+      adapter: policy_ast
+      description: Permission resolves from a typed policy, not a tag.
+      fixture:
+        domain: permissions
+        effect: allow
+        condition:
+          operator: policy_ref
+          value: policy.permission.admin@1.0.0
+      expect: {result: pass, disposition: accept, findings: []}
+
+    - id: P-ALR-010-01
+      rule_id: ALR-010
+      adapter: classification_document
+      description: Revision preserves immutable predecessor lineage.
+      fixture:
+        decision_id: classification.decision.agent_9
+        revision: 2
+        history:
+          record_mode: append_only
+          supersedes_decision_refs: [classification.decision.agent_9@1]
+      expect: {result: pass, disposition: accept, findings: []}
+
+    - id: P-ALR-011-01
+      rule_id: ALR-011
+      adapter: runtime_resolution
+      description: Runtime ambiguity abstains from visible evidence and creates a typed move.
+      fixture:
+        resolver_ref: runtime.classification.v1
+        input_contract_ref: contract.classification.input@1.0.0
+        interpretation_basis:
+          schema_refs: [schema.classification@0.2.0]
+        fallback: typed_abstention
+        proposed_move_ref: proposed_move.classification.ambiguous@1.0.0
+      expect: {result: pass, disposition: accept, findings: []}
 

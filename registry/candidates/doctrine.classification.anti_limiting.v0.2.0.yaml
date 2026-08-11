@@ -3,12 +3,14 @@ kind: DoctrineCandidate
 
 metadata:
   id: doctrine.classification.anti_limiting
-  version: 0.1.0
+  version: 0.2.0
   status: candidate
   proposed_on: 2026-08-11
   proposed_by: bryan
   owner: quirk-core
-  supersedes: []
+  supersedes:
+    - doctrine.classification.anti_limiting@0.1.0
+  revision_decision_ref: admission.decision.doctrine.classification.anti_limiting.revise.0001
 
 spec:
   title: Eleven Anti-Limiting Rules
@@ -45,7 +47,12 @@ spec:
       - state
       - authority
     authoritative_separation: required
-    default_cardinality: multiple
+    cardinality:
+      identity: one_primary_plus_zero_or_more_roles
+      purpose: multiple
+      style: multiple_facets
+      state: one_or_more_declared_dimensions
+      authority: multiple_policy_and_principal_references
     cross_axis_views:
       allowed: true
       authoritative: false
@@ -318,11 +325,11 @@ spec:
 
   admission:
     prohibited_operational_statuses_until_approved:
-      - Live
-      - Current
-      - Active
-      - Chooseable
-      - Useable
+      - live
+      - current
+      - active
+      - chooseable
+      - useable
     required_gates:
       - quirk_approval
       - procedures
@@ -339,7 +346,6 @@ spec:
     decision_outcomes:
       - approve
       - revise
-      - defer
       - reject
       - supersede
 
@@ -349,4 +355,5 @@ spec:
     missing_decision: create_proposed_move
     raw_input_retention: according_to_policy
     hidden_context_reconstruction: prohibited
+
 

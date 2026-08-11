@@ -1,0 +1,84 @@
+name: Candidate validation
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/candidate-validation.yml"
+      - "decisions/**"
+      - "docs/candidates/**"
+      - "evals/**"
+      - "registry/**"
+      - "schemas/**"
+      - "scripts/**"
+      - "tests/**"
+      - "package.json"
+      - "package-lock.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  candidate-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run validate:candidate
+
+  cloudflare-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    defaults:
+      run:
+        working-directory: adapters/cloudflare
+    env:
+      XDG_CONFIG_HOME: ${{ runner.temp }}/wrangler-config
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: adapters/cloudflare/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm run check
+      - run: npx wrangler types --include-runtime=false
+
+  supabase-projection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create disposable Supabase API roles
+        run: >-
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c
+          "create role anon nologin; create role authenticated nologin; create role service_role nologin;"
+      - name: Apply candidate projection
+        run: >-
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f
+          projections/supabase/migrations/20260811183747_candidate_admission_projection.sql
+      - name: Verify and roll back fixtures
+        run: >-
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f
+          projections/supabase/tests/001_candidate_projection_verification.sql

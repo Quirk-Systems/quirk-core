@@ -27,18 +27,36 @@ Canonical definitions, runtime enforcement, and database projections remain
 separate products. Implementations may project Core contracts into code or
 storage, but those projections do not become the ontology.
 
-## Current candidate
+## Current candidate lineage
 
-[Eleven Anti-Limiting Rules](docs/candidates/anti-limiting-classification-doctrine.md)
-protect Quirk classification from collapsed hierarchies, adjective inflation,
-source-term drift, erased history, tag-based authority, and invisible human
-context.
+[Eleven Anti-Limiting Rules v0.1.0](docs/candidates/anti-limiting-classification-doctrine.md)
+was reviewed as a candidate and received an explicit **REVISE** decision. It
+remains non-operative and preserved for decision history. The evidence-backed
+[v0.2.0 revision](docs/candidates/anti-limiting-classification-doctrine.v0.2.0.md)
+is also a candidate; passing its local proof does not admit it to canon.
 
-Its machine contract and proof fixtures live beside it:
+The revision adds strict machine contracts, positive controls, cross-cutting
+authority tests, and deterministic adapters:
 
-- `registry/candidates/doctrine.classification.anti_limiting.v0.1.0.yaml`
-- `schemas/classification-decision.schema.json`
-- `evals/classification/anti-limiting-rules.v0.1.0.yaml`
+- `registry/candidates/doctrine.classification.anti_limiting.v0.2.0.yaml`
+- `schemas/classification-decision.v0.2.0.schema.json`
+- `evals/classification/anti-limiting-rules.v0.2.0.yaml`
+- `decisions/admission/doctrine.classification.anti_limiting.revise.0001.yaml`
+
+Run the candidate proof with Node.js 22:
+
+```sh
+npm ci --ignore-scripts
+npm test
+npm run validate:candidate
+```
+
+The validator compiles all candidate schemas in strict Draft 2020-12 mode,
+checks all eleven source hashes, executes all 22 adversarial fixtures with
+exact result/disposition/finding matching, runs three cross-cutting authority
+fixtures and eleven positive controls, and probes the closed schema loopholes.
+The GitHub workflow reports proof status only; it has no admission, release, or
+deployment authority.
 
 ## Status language
 
