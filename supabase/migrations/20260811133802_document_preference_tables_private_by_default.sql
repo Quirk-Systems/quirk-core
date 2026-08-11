@@ -1,0 +1,3 @@
+comment on table public.preference_references is 'Immutable provenance records for preference evidence. RLS enabled and anon/authenticated privileges revoked until an explicit Preference access policy is canonized.';
+
+comment on table public.preference_edges is 'Canonical derived preference relations. Every edge must declare purpose, context, authority, validity, and provenance via reference_id or explicit system_default=true. RLS enabled and anon/authenticated privileges revoked until explicit access policies are canonized.';
