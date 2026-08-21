@@ -1,0 +1,13 @@
+{
+  "repository": "Quirk-Systems/quirk-core",
+  "class": "doctrine",
+  "lifecycle": "candidate",
+  "admission": "not_admitted",
+  "authority": "Quirk-Systems/.github",
+  "owner": {
+    "state": "open"
+  },
+  "runtime": "none",
+  "deployment": "none",
+  "consumer_authority": "none"
+}

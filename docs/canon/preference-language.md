@@ -1,138 +1,59 @@
 # Quirk Preference Language
 
-Status: **CANON**  
-Owner: **Quirk Preference**  
-Effective: 2026-08-11
+Status: **CANDIDATE DOCTRINE — NOT ADMITTED**
 
-## Canonical vocabulary
+Owner: **Open**
 
-### Quirk Preference
-The bounded technical system responsible for capturing, interpreting, governing, resolving, and applying contextual preference intelligence.
+Applying runtime: **None**
 
-### Quirk Preferences
-A derived, authorized, purpose-specific projection of the Preference Graph. `Preferences` is a view or collection surface, never the canonical store.
+Deployment evidence: **None**
 
-### Quirk Preference Graph
-The canonical relationship model connecting subjects, options, attributes, objectives, contexts, evidence, decisions, outcomes, exceptions, contradictions, permissions, and change over time.
+The `docs/canon` directory is historical naming. Its path does not confer governance authority, admission, ownership, deployment, or runtime effect. Repository authority remains `Quirk-Systems/.github`; admission remains an open human governance decision.
 
-### Preference Reference
-An immutable, addressable provenance object containing evidence that may support, oppose, qualify, or contextualize a preference conclusion.
+## Proposed vocabulary
 
-### Quirk Preference References
-The evidence collection / registry. It is not a second preference system.
+- **Quirk Preference**: a proposed bounded system for capturing, governing, and applying contextual preference evidence.
+- **Preference Graph**: a proposed relationship model connecting subjects, scope, evidence, decisions, validity, and outcomes.
+- **Preference Reference**: proposed provenance evidence that may support or qualify a preference candidate.
+- **Preference Edge**: a proposed contextual relation recorded only after the contract's separate explicit human confirmation.
+- **Preference Basis**: a historical concept for a runtime decision receipt. The v1 portable wedge emits no `PreferenceBasis` and no equivalent runtime authority object.
 
-### Preference Edge
-A contextual, reversible graph relation representing a preference conclusion derived from evidence or explicitly declared as a system default.
-
-### Preference Basis
-The immutable decision receipt identifying the exact preference edges and references selected to govern one preference-sensitive Move, including exclusions, contradictions, authority resolution, and policy version.
-
-## Foundational distinction
+The useful conceptual distinction remains:
 
 ```text
 Reference != Signal != Preference != Rule
 ```
 
-A Reference records evidence. A Signal is an interpretation of evidence. A Preference Edge is a contextual directional conclusion. A Rule is a binding constraint and must never be silently downgraded into weighted preference evidence.
+That distinction is doctrine under evaluation, not proof of an implementing runtime.
 
-## PreferenceEdge validation invariant
+## Candidate pipeline
 
-**CANON: validation is fail-closed.**
-
-No `PreferenceEdge` may validate, persist, become Active/Current/Chooseable/Useable, or participate in a `PreferenceBasis` unless all of the following are explicitly present and non-empty:
-
-1. `purpose`
-2. `context`
-3. `authority`
-4. `validity`
-5. provenance satisfying at least one of:
-   - `reference_id` points to a valid `PreferenceReference`; or
-   - `system_default = true` is explicitly declared.
-
-Formally:
+The proposed pipeline is evidence-first:
 
 ```text
-VALID(edge) :=
-  nonempty(edge.purpose)
-  AND nonempty(edge.context)
-  AND nonempty(edge.authority)
-  AND nonempty(edge.validity)
-  AND (edge.reference_id != null OR edge.system_default == true)
+explicit statement -> candidate -> proposal -> human decision
+                   -> deterministic projection -> recorded receipt
+                   -> optional separate confirmation -> recorded edge
 ```
 
-Absence is not neutrality. Missing semantics or provenance makes the edge invalid.
+The portable v1 contract fixes one non-sensitive predicate and one project scope. Its projection is a deterministic simulation with `applied: false`. It grants no consumer or runtime authority. A project-only approval does not silently authorize edge creation.
 
-## Provenance rule
+## Historical database artifacts
 
-`system_default` is an explicit provenance class, not an implicit fallback. It defaults to `false`. An edge without a `reference_id` is invalid unless its producer deliberately sets `system_default = true`.
+The checked-in SQL migrations are historical candidate artifacts. There is no evidence here that they were deployed. They must not be described as a final enforcement boundary.
 
-This prevents inferred, accidental, legacy, or model-generated state from acquiring preference authority merely because provenance was omitted.
+The SQL has weaker semantics than the portable v1 validator:
 
-## Runtime projection
+- it has no update/delete trigger that proves immutable rows;
+- its JSONB checks accept shapes beyond typed, non-empty objects;
+- any satisfying foreign-key reference passes its weaker provenance rule;
+- it does not enforce explicit non-sensitive self evidence, authentication assertion shape, exact scope, expiry, separate confirmation, or the candidate lifecycle;
+- its legacy `system_default = true` escape hatch is forbidden by this wedge.
 
-```text
-Preference Reference
-        -> Preference Signal / Event
-        -> Preference Edge
-        -> Preference Graph
-        -> Preference Basis
-        -> Preference-sensitive Move
-        -> Observed Outcome
-        -> New Reference
-```
+Migration history is not rewritten by this cut. For the candidate v1 contract, `scripts/validate_preference_wedge.py` is the portable fail-closed boundary.
 
-Canonical records must preserve enough lineage to reconstruct why an edge existed and why it affected a Move.
+## Authority boundary
 
-## Storage contract
+The contract records upstream human/authentication assertions but does not claim to be an identity provider. It does not authenticate a person, deploy a service, persist production state, personalize a consumer, admit doctrine, or select an owner. Missing or expanded semantics fail closed.
 
-The current Supabase projection uses:
-
-- `public.preference_references`
-- `public.preference_edges`
-
-Database constraints enforce the canonical `PreferenceEdge` invariant independently of application validation.
-
-`preference_edges_required_semantics_check` rejects empty `purpose`, `context`, `authority`, or `validity`.
-
-`preference_edges_provenance_check` rejects any edge lacking both a `reference_id` and explicit `system_default = true`.
-
-The reference foreign key uses `ON DELETE RESTRICT`: provenance supporting a persisted edge cannot disappear underneath that edge.
-
-The preference tables are private-by-default: RLS is enabled and `anon` / `authenticated` table privileges are revoked until Quirk Preference access policies are separately designed, approved, and canonized.
-
-## Architectural rule
-
-Application schemas may make the invariant stricter but never weaker. TypeScript, API, agent-skill, import, migration, and UI validators must reproduce or strengthen the database invariant. The database remains the final fail-closed enforcement boundary.
-
-## Product vocabulary mapping
-
-| Technical vocabulary | Quirk product language |
-| --- | --- |
-| Quirk Preference | Quirk Gravity |
-| Preference Graph | Gravity Graph |
-| Context partition | Gravity Field |
-| Preference runtime | Gravity Engine |
-| Preference References + Preference Basis | Gravity Trace |
-| Preference change event | Gravity Shift |
-| Portable preference projection | Gravity Print |
-| Human authority interface | Gravity Controls |
-
-Technical vocabulary is canonical for schemas, APIs, contracts, interoperability, tests, and migrations. Product vocabulary may be used on human-facing surfaces without changing the underlying object semantics.
-
-## Acceptance tests
-
-A compliant implementation MUST prove all of these:
-
-- reference-backed edge with all required semantics: ACCEPT
-- explicit system-default edge with all required semantics: ACCEPT
-- edge with neither reference nor explicit system default: REJECT
-- edge with empty purpose: REJECT
-- edge with empty context: REJECT
-- edge with empty authority: REJECT
-- edge with empty validity: REJECT
-- deletion of a referenced provenance row while an edge depends on it: REJECT
-- application validator cannot bypass database enforcement: REJECT
-
-## Change control
-
-Changes to these meanings or validation requirements are governance changes, not ordinary refactors. Any weakening of the invariant requires an explicit Proposed Move, evidence, compatibility analysis, migration plan, and Quirk Approval before admission.
+Changes to these candidate meanings require review through the repository authority. They do not become canon merely because they are merged into this candidate repository.

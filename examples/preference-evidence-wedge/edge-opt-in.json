@@ -1,0 +1,234 @@
+{
+  "schema_version": "preference-evidence-wedge.v1",
+  "contract_status": "candidate",
+  "admission_effect": "none",
+  "runtime_authority": "none",
+  "candidate": {
+    "object_version": "preference-candidate.v1",
+    "id": "candidate:sha256:800f4afb8e8f587b9688524c574b3454824cf4dea4ce66323955e2db43218049",
+    "content_sha256": "sha256:800f4afb8e8f587b9688524c574b3454824cf4dea4ce66323955e2db43218049",
+    "predicate": "presentation.response_density",
+    "value": "balanced",
+    "subject": {
+      "kind": "authenticated_self",
+      "subject_id": "user:example"
+    },
+    "scope": {
+      "project": "Quirk-Systems/project-scaffold",
+      "purpose": "repository-audit-reporting",
+      "context": "project-scaffold-reference",
+      "surface": "repository-audit-report",
+      "task": "render-repository-audit-report"
+    },
+    "evidence": {
+      "type": "explicit_user_statement",
+      "sensitivity": "non_sensitive",
+      "statement": "For repository audit reports in this project, use balanced response density.",
+      "statement_sha256": "sha256:29e8b45823c60fc1e058af8008e0a00962a6bbe630a091b133c0541ed978a4d1",
+      "captured_at": "2026-08-21T10:00:00Z",
+      "actor": {
+        "actor_type": "human",
+        "actor_id": "user:example",
+        "subject_relation": "self",
+        "authentication": {
+          "status": "authenticated",
+          "session_ref": "authn:example-session"
+        }
+      }
+    },
+    "authority": {
+      "kind": "human_self_statement",
+      "effect": "evidence_only",
+      "runtime_authority": "none"
+    },
+    "validity": {
+      "not_before": "2026-08-21T10:00:00Z",
+      "expires_at": "2027-01-01T00:00:00Z"
+    },
+    "system_default": false
+  },
+  "proposal": {
+    "object_version": "preference-proposal.v1",
+    "id": "proposal:sha256:834d56971b3f809749cc32555525cc0475cfe43e622adad58aa1a6ad44c790c8",
+    "content_sha256": "sha256:834d56971b3f809749cc32555525cc0475cfe43e622adad58aa1a6ad44c790c8",
+    "candidate_ref": {
+      "id": "candidate:sha256:800f4afb8e8f587b9688524c574b3454824cf4dea4ce66323955e2db43218049",
+      "content_sha256": "sha256:800f4afb8e8f587b9688524c574b3454824cf4dea4ce66323955e2db43218049"
+    },
+    "requested_effect": "project_only",
+    "scope": {
+      "project": "Quirk-Systems/project-scaffold",
+      "purpose": "repository-audit-reporting",
+      "context": "project-scaffold-reference",
+      "surface": "repository-audit-report",
+      "task": "render-repository-audit-report"
+    },
+    "proposed_at": "2026-08-21T10:01:00Z",
+    "runtime_authority": "none"
+  },
+  "decision": {
+    "object_version": "preference-decision.v1",
+    "id": "decision:sha256:e0268216971d4f734389b1ec73a181a3847c3f9830f3ce9b620cd8af376d61bd",
+    "content_sha256": "sha256:e0268216971d4f734389b1ec73a181a3847c3f9830f3ce9b620cd8af376d61bd",
+    "proposal_ref": {
+      "id": "proposal:sha256:834d56971b3f809749cc32555525cc0475cfe43e622adad58aa1a6ad44c790c8",
+      "content_sha256": "sha256:834d56971b3f809749cc32555525cc0475cfe43e622adad58aa1a6ad44c790c8"
+    },
+    "outcome": "approved",
+    "actor": {
+      "actor_type": "human",
+      "actor_id": "user:example",
+      "subject_relation": "self",
+      "authentication": {
+        "status": "authenticated",
+        "session_ref": "authn:example-session"
+      }
+    },
+    "explicit": true,
+    "scope": {
+      "project": "Quirk-Systems/project-scaffold",
+      "purpose": "repository-audit-reporting",
+      "context": "project-scaffold-reference",
+      "surface": "repository-audit-report",
+      "task": "render-repository-audit-report"
+    },
+    "decided_at": "2026-08-21T10:02:00Z",
+    "expires_at": "2026-12-31T00:00:00Z",
+    "approved_effects": [
+      "project_only"
+    ],
+    "runtime_authority": "none"
+  },
+  "projection": {
+    "object_version": "preference-projection.v1",
+    "id": "projection:sha256:fdf5a21875ccc08a8e5450f69bcef465c6807d8faab1f08bc958fd65ada28040",
+    "content_sha256": "sha256:fdf5a21875ccc08a8e5450f69bcef465c6807d8faab1f08bc958fd65ada28040",
+    "decision_ref": {
+      "id": "decision:sha256:e0268216971d4f734389b1ec73a181a3847c3f9830f3ce9b620cd8af376d61bd",
+      "content_sha256": "sha256:e0268216971d4f734389b1ec73a181a3847c3f9830f3ce9b620cd8af376d61bd"
+    },
+    "mode": "deterministic_simulation",
+    "effect": "project_only",
+    "scope": {
+      "project": "Quirk-Systems/project-scaffold",
+      "purpose": "repository-audit-reporting",
+      "context": "project-scaffold-reference",
+      "surface": "repository-audit-report",
+      "task": "render-repository-audit-report"
+    },
+    "result": {
+      "predicate": "presentation.response_density",
+      "value": "balanced"
+    },
+    "result_sha256": "sha256:259ea15fe558207f1272e40ebaa508977474984318bcef4803053061a5a54c72",
+    "simulated_at": "2026-08-21T10:03:00Z",
+    "applied": false,
+    "consumer_authority": "none",
+    "runtime_authority": "none"
+  },
+  "receipt": {
+    "object_version": "preference-projection-receipt.v1",
+    "id": "receipt:sha256:5e2f3dd1ccdd980e9d6faea145adae58c66ef07b7cbc5f5e47511459244de258",
+    "content_sha256": "sha256:5e2f3dd1ccdd980e9d6faea145adae58c66ef07b7cbc5f5e47511459244de258",
+    "candidate_ref": {
+      "id": "candidate:sha256:800f4afb8e8f587b9688524c574b3454824cf4dea4ce66323955e2db43218049",
+      "content_sha256": "sha256:800f4afb8e8f587b9688524c574b3454824cf4dea4ce66323955e2db43218049"
+    },
+    "proposal_ref": {
+      "id": "proposal:sha256:834d56971b3f809749cc32555525cc0475cfe43e622adad58aa1a6ad44c790c8",
+      "content_sha256": "sha256:834d56971b3f809749cc32555525cc0475cfe43e622adad58aa1a6ad44c790c8"
+    },
+    "decision_ref": {
+      "id": "decision:sha256:e0268216971d4f734389b1ec73a181a3847c3f9830f3ce9b620cd8af376d61bd",
+      "content_sha256": "sha256:e0268216971d4f734389b1ec73a181a3847c3f9830f3ce9b620cd8af376d61bd"
+    },
+    "projection_ref": {
+      "id": "projection:sha256:fdf5a21875ccc08a8e5450f69bcef465c6807d8faab1f08bc958fd65ada28040",
+      "content_sha256": "sha256:fdf5a21875ccc08a8e5450f69bcef465c6807d8faab1f08bc958fd65ada28040"
+    },
+    "candidate_statement_sha256": "sha256:29e8b45823c60fc1e058af8008e0a00962a6bbe630a091b133c0541ed978a4d1",
+    "projection_result_sha256": "sha256:259ea15fe558207f1272e40ebaa508977474984318bcef4803053061a5a54c72",
+    "effect": "project_only",
+    "recorded_at": "2026-08-21T10:04:00Z",
+    "applied": false,
+    "authority_effect": "none"
+  },
+  "edge_confirmation": {
+    "object_version": "preference-edge-confirmation.v1",
+    "id": "edge-confirmation:sha256:4c931983f4178fc83aa7160ebb2af2141cf6cb9288f30af3d6f3580192b44bf9",
+    "content_sha256": "sha256:4c931983f4178fc83aa7160ebb2af2141cf6cb9288f30af3d6f3580192b44bf9",
+    "receipt_ref": {
+      "id": "receipt:sha256:5e2f3dd1ccdd980e9d6faea145adae58c66ef07b7cbc5f5e47511459244de258",
+      "content_sha256": "sha256:5e2f3dd1ccdd980e9d6faea145adae58c66ef07b7cbc5f5e47511459244de258"
+    },
+    "effect": "create_edge",
+    "actor": {
+      "actor_type": "human",
+      "actor_id": "user:example",
+      "subject_relation": "self",
+      "authentication": {
+        "status": "authenticated",
+        "session_ref": "authn:example-session"
+      }
+    },
+    "explicit": true,
+    "predicate": "presentation.response_density",
+    "value": "balanced",
+    "scope": {
+      "project": "Quirk-Systems/project-scaffold",
+      "purpose": "repository-audit-reporting",
+      "context": "project-scaffold-reference",
+      "surface": "repository-audit-report",
+      "task": "render-repository-audit-report"
+    },
+    "confirmed_at": "2026-08-21T10:05:00Z",
+    "expires_at": "2026-12-30T00:00:00Z",
+    "runtime_authority": "none"
+  },
+  "learned_edge": {
+    "object_version": "preference-edge.v1",
+    "id": "edge:sha256:54a8a3476aee8925da6859a74cf9c64cd408e1c2d571af1e84e74fde97b71f45",
+    "content_sha256": "sha256:54a8a3476aee8925da6859a74cf9c64cd408e1c2d571af1e84e74fde97b71f45",
+    "subject": {
+      "kind": "authenticated_self",
+      "subject_id": "user:example"
+    },
+    "predicate": "presentation.response_density",
+    "value": "balanced",
+    "scope": {
+      "project": "Quirk-Systems/project-scaffold",
+      "purpose": "repository-audit-reporting",
+      "context": "project-scaffold-reference",
+      "surface": "repository-audit-report",
+      "task": "render-repository-audit-report"
+    },
+    "validity": {
+      "not_before": "2026-08-21T10:05:00Z",
+      "expires_at": "2026-12-30T00:00:00Z"
+    },
+    "reference": {
+      "type": "explicit_user_statement",
+      "candidate_ref": {
+        "id": "candidate:sha256:800f4afb8e8f587b9688524c574b3454824cf4dea4ce66323955e2db43218049",
+        "content_sha256": "sha256:800f4afb8e8f587b9688524c574b3454824cf4dea4ce66323955e2db43218049"
+      }
+    },
+    "receipt_ref": {
+      "id": "receipt:sha256:5e2f3dd1ccdd980e9d6faea145adae58c66ef07b7cbc5f5e47511459244de258",
+      "content_sha256": "sha256:5e2f3dd1ccdd980e9d6faea145adae58c66ef07b7cbc5f5e47511459244de258"
+    },
+    "confirmation_ref": {
+      "id": "edge-confirmation:sha256:4c931983f4178fc83aa7160ebb2af2141cf6cb9288f30af3d6f3580192b44bf9",
+      "content_sha256": "sha256:4c931983f4178fc83aa7160ebb2af2141cf6cb9288f30af3d6f3580192b44bf9"
+    },
+    "authority": {
+      "kind": "explicit_human_confirmation",
+      "runtime_authority": "none"
+    },
+    "system_default": false,
+    "state": "recorded",
+    "applied": false,
+    "consumer_authority": "none",
+    "runtime_authority": "none"
+  }
+}
