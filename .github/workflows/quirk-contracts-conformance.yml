@@ -2,17 +2,15 @@ name: Quirk Contracts Conformance
 
 on:
   pull_request:
-    paths:
-      - 'contracts/v0.2/**'
-      - '.github/workflows/quirk-contracts-conformance.yml'
   push:
     branches: [main]
-    paths:
-      - 'contracts/v0.2/**'
-      - '.github/workflows/quirk-contracts-conformance.yml'
 
 permissions:
   contents: read
+
+concurrency:
+  group: quirk-contracts-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   frozen-contracts:
