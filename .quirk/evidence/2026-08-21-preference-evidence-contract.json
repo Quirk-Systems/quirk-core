@@ -1,0 +1,145 @@
+{
+  "schema_version": "evidence-receipt.v1",
+  "receipt_id": "qreceipt.2026-08-21.preference-evidence-contract",
+  "repository": "Quirk-Systems/quirk-core",
+  "status": "verified",
+  "subject": {
+    "base_commit": "1b70bce23e88ecb97d652bd8a50896c8f4bc64c4",
+    "commit": "0b4fc6debf5c93b94463c9a460d022cfbdf4a37b",
+    "changed_paths": [
+      ".github/workflows/evidence-binding.yml",
+      ".quirk/manifest.json",
+      "README.md",
+      "docs/canon/preference-evidence-wedge.md",
+      "docs/canon/preference-language.md",
+      "examples/preference-evidence-wedge/edge-opt-in.json",
+      "examples/preference-evidence-wedge/project-only.json",
+      "schemas/preference-evidence-wedge.v1.schema.json",
+      "scripts/validate_preference_wedge.py",
+      "tests/test_preference_wedge_contract.py"
+    ]
+  },
+  "claims": [
+    {
+      "claim_id": "qclaim.preference-evidence-contract",
+      "claim_type": "evidence",
+      "authority_effect": "none",
+      "statement": "The subject commit defines and tests a candidate-only, content-addressed preference evidence wedge with no admission, runtime, consumer, deployment, or application authority.",
+      "evidence_paths": [
+        ".github/workflows/evidence-binding.yml",
+        ".quirk/manifest.json",
+        "README.md",
+        "docs/canon/preference-evidence-wedge.md",
+        "docs/canon/preference-language.md",
+        "examples/preference-evidence-wedge/edge-opt-in.json",
+        "examples/preference-evidence-wedge/project-only.json",
+        "schemas/preference-evidence-wedge.v1.schema.json",
+        "scripts/validate_preference_wedge.py",
+        "tests/test_preference_wedge_contract.py"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": ".github/workflows/evidence-binding.yml",
+      "state": "present",
+      "git_blob": "2a84cbe59bbaeabeb7363c16f831818ccf9ef8cf",
+      "sha256": "sha256:b0a2e67e1f93d3ff19b44184968ae812f5d4e7b08cd743927c59c24ff96e7087"
+    },
+    {
+      "path": ".quirk/manifest.json",
+      "state": "present",
+      "git_blob": "1213d05ea4a58e7d2fb0d283132101d686034cb0",
+      "sha256": "sha256:a4845f8636f61a78d7b72cd74efcf7b9ad2e63c46a9700815e49a306f9d0797c"
+    },
+    {
+      "path": "README.md",
+      "state": "present",
+      "git_blob": "bb09ecff8d91401356977fb8ece25a3952cd1971",
+      "sha256": "sha256:f47364d04b7cfc4f5ec755d705373ce1949958c7d7614c2df59499b5f4b25026"
+    },
+    {
+      "path": "docs/canon/preference-evidence-wedge.md",
+      "state": "present",
+      "git_blob": "34eea822e704c210ba151eb981c067ca8e385f0b",
+      "sha256": "sha256:f45fc53319fd6c2e9b81cb36d8486b8d29488dbbae1d9b0aa4b0a26c1c126df1"
+    },
+    {
+      "path": "docs/canon/preference-language.md",
+      "state": "present",
+      "git_blob": "bc2dd40741f120b25babcaf677c9898e34eba480",
+      "sha256": "sha256:0c231159b560cb89ec592efbde74fd34f1af141d873b669d5653e5c1cd5aa827"
+    },
+    {
+      "path": "examples/preference-evidence-wedge/edge-opt-in.json",
+      "state": "present",
+      "git_blob": "e9d82ff5fd785346aa1ab7b68ca55542e3cc6f2f",
+      "sha256": "sha256:6d22101a4ce8e7aa9a2475d0e063c29500cca8df71de21d842784708751e3862"
+    },
+    {
+      "path": "examples/preference-evidence-wedge/project-only.json",
+      "state": "present",
+      "git_blob": "bcea15fd2197b5710dea4fbf39b6cffe128bb3c5",
+      "sha256": "sha256:54098674a02d9fdce81d89b0b30349ed868c8a6750c89343814f036c0303a41f"
+    },
+    {
+      "path": "schemas/preference-evidence-wedge.v1.schema.json",
+      "state": "present",
+      "git_blob": "8b04608ffee9a326f5562e1a496a49d8e1db098c",
+      "sha256": "sha256:db5cf4cd2b2d7131bef945b828b17a35fa02a08f1bfa5b7af5bcb9c6dde87ca7"
+    },
+    {
+      "path": "scripts/validate_preference_wedge.py",
+      "state": "present",
+      "git_blob": "42c5980bdf98d7c18d1dc093fa6042a9037f0042",
+      "sha256": "sha256:489331bb2ac1b7e4f034a07ace9017ec7cef3ec1764d1c7226b778261997e888"
+    },
+    {
+      "path": "tests/test_preference_wedge_contract.py",
+      "state": "present",
+      "git_blob": "9bed1ba72acefaadc8c7e2bcdc9bdb86e16609ac",
+      "sha256": "sha256:6226190437297d1197f3c4386031b6313aac6a066680897bb794bc20ee04af8c"
+    }
+  ],
+  "verification": {
+    "commands": [
+      {
+        "command": "python -m unittest discover -s tests -v",
+        "result": "pass",
+        "exit_code": 0
+      },
+      {
+        "command": "python scripts/validate_preference_wedge.py --schema schemas/preference-evidence-wedge.v1.schema.json examples/preference-evidence-wedge/*.json",
+        "result": "pass",
+        "exit_code": 0
+      },
+      {
+        "command": "test \"$(find examples/preference-evidence-wedge -maxdepth 1 -type f -name '*.json' | wc -l)\" -eq 2",
+        "result": "pass",
+        "exit_code": 0
+      },
+      {
+        "command": "python /workspace/scratch/6f6fa2996563/worktrees/org-github-remote-final2/scripts/validate_evidence_receipts.py --repository Quirk-Systems/quirk-core --root . --receipts .quirk/evidence",
+        "result": "pass",
+        "exit_code": 0
+      },
+      {
+        "command": "test \"$(grep -c 'uses: Quirk-Systems/.github/.github/workflows/reusable-evidence-binding.yml@6136fa5fa77116abfbc103c822d9d244a0e870b3' .github/workflows/evidence-binding.yml)\" -eq 1",
+        "result": "pass",
+        "exit_code": 0
+      },
+      {
+        "command": "git diff --check 1b70bce23e88ecb97d652bd8a50896c8f4bc64c4 0b4fc6debf5c93b94463c9a460d022cfbdf4a37b",
+        "result": "pass",
+        "exit_code": 0
+      }
+    ],
+    "verified_at": "2026-08-21T04:59:46Z"
+  },
+  "authority": {
+    "admission_effect": "none",
+    "authority_ref": null
+  },
+  "correction": null,
+  "receipt_sha256": "sha256:696def3fc3f4e13900e3cdb4ea6c8d7e84ea2fb410a7d7837326287656b70d41"
+}
