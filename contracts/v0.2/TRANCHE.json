@@ -1,0 +1,31 @@
+{
+  "apiVersion": "quirk.systems/contracts/v0.2",
+  "kind": "ContractTranche",
+  "metadata": {
+    "id": "tranche_constitutional_quality_v0_2",
+    "version": "0.2.0",
+    "status": "frozen",
+    "frozenDigest": "sha256:c0532f523ad415e3f996068486699d71b69c8b3aa0768e0c551ad25313c459b6"
+  },
+  "contracts": [
+    {"id":"contract_000","schema":"schemas/contract_000.schema.json","fixtureSet":"fixtures.json","expected":{"positive":"pass","negative":"fail","adversarial":"fail","exemplar":"pass"}},
+    {"id":"contract_005","schema":"schemas/contract_005.schema.json","fixtureSet":"fixtures.json","expected":{"positive":"pass","negative":"fail","adversarial":"fail","exemplar":"pass"}},
+    {"id":"contract_006","schema":"schemas/contract_006.schema.json","fixtureSet":"fixtures.json","expected":{"positive":"pass","negative":"fail","adversarial":"fail","exemplar":"pass"}},
+    {"id":"contract_007","schema":"schemas/contract_007.schema.json","fixtureSet":"fixtures.json","expected":{"positive":"pass","negative":"fail","adversarial":"fail","exemplar":"pass"}},
+    {"id":"contract_008","schema":"schemas/contract_008.schema.json","fixtureSet":"fixtures.json","expected":{"positive":"pass","negative":"fail","adversarial":"fail","exemplar":"pass"}},
+    {"id":"contract_009","schema":"schemas/contract_009.schema.json","fixtureSet":"fixtures.json","expected":{"positive":"pass","negative":"fail","adversarial":"fail","exemplar":"pass"}},
+    {"id":"contract_010","schema":"schemas/contract_010.schema.json","fixtureSet":"fixtures.json","expected":{"positive":"pass","negative":"fail","adversarial":"fail","exemplar":"pass"}},
+    {"id":"contract_011","schema":"schemas/contract_011.schema.json","fixtureSet":"fixtures.json","expected":{"positive":"pass","negative":"fail","adversarial":"fail","exemplar":"pass"}},
+    {"id":"contract_012","schema":"schemas/contract_012.schema.json","fixtureSet":"fixtures.json","expected":{"positive":"pass","negative":"fail","adversarial":"fail","exemplar":"pass"}}
+  ],
+  "invariants": [
+    "capability_never_implies_authority",
+    "authorized_state_requires_explicit_authority",
+    "consequential_successful_execution_leaves_a_receipt",
+    "ship_and_exemplar_outputs_declare_requirements",
+    "evidenced_requires_evidence",
+    "verified_completion_cannot_hide_open_work",
+    "passing_evaluations_require_evidence",
+    "q11_cannot_be_self_declared_and_requires_distinctive_advantage"
+  ]
+}
