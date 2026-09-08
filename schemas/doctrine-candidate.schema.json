@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.quirk.systems/doctrine-candidate/0-2-0.schema.json",
+  "title": "Quirk Doctrine Candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["api_version", "kind", "metadata", "spec"],
+  "properties": {
+    "api_version": { "const": "quirk.systems/v1alpha1" },
+    "kind": { "const": "DoctrineCandidate" },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "status", "proposed_on", "proposed_by", "owner", "supersedes"],
+      "properties": {
+        "id": { "pattern": "^doctrine\\.[a-z0-9][a-z0-9._-]*$", "type": "string" },
+        "version": { "$ref": "#/$defs/SemVer" },
+        "status": { "const": "candidate" },
+        "proposed_on": { "format": "date", "type": "string" },
+        "proposed_by": { "$ref": "#/$defs/Reference" },
+        "owner": { "$ref": "#/$defs/Reference" },
+        "supersedes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/VersionedReference" }
+        },
+        "revision_decision_ref": { "$ref": "#/$defs/Reference" }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "purpose",
+        "normative_authority",
+        "enforcement_mode",
+        "source_integrity",
+        "scope",
+        "classification_axes",
+        "rules",
+        "resolution_states",
+        "claim_kinds",
+        "exception_contract",
+        "admission",
+        "runtime_failure_behavior"
+      ],
+      "properties": {
+        "title": { "minLength": 1, "type": "string" },
+        "purpose": { "minLength": 1, "type": "string" },
+        "normative_authority": { "const": "none_until_admitted" },
+        "enforcement_mode": { "const": "shadow_only" },
+        "source_integrity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["encoding", "normalization", "hash_algorithm", "mutation_policy"],
+          "properties": {
+            "encoding": { "const": "UTF-8" },
+            "normalization": { "const": "none" },
+            "hash_algorithm": { "const": "sha256" },
+            "mutation_policy": { "const": "new_version_and_supersession_required" }
+          }
+        },
+        "scope": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/Reference" }
+        },
+        "classification_axes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required", "authoritative_separation", "cardinality", "cross_axis_views"],
+          "properties": {
+            "required": {
+              "const": ["identity", "purpose", "style", "state", "authority"],
+              "type": "array"
+            },
+            "authoritative_separation": { "const": "required" },
+            "cardinality": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["identity", "purpose", "style", "state", "authority"],
+              "properties": {
+                "identity": { "const": "one_primary_plus_zero_or_more_roles" },
+                "purpose": { "const": "multiple" },
+                "style": { "const": "multiple_facets" },
+                "state": { "const": "one_or_more_declared_dimensions" },
+                "authority": { "const": "multiple_policy_and_principal_references" }
+              }
+            },
+            "cross_axis_views": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["allowed", "authoritative", "reversible", "source_axes_required"],
+              "properties": {
+                "allowed": { "const": true },
+                "authoritative": { "const": false },
+                "reversible": { "const": true },
+                "source_axes_required": { "const": true }
+              }
+            }
+          }
+        },
+        "rules": {
+          "type": "array",
+          "minItems": 11,
+          "maxItems": 11,
+          "items": { "$ref": "#/$defs/Rule" }
+        },
+        "resolution_states": { "type": "object" },
+        "claim_kinds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/Reference" }
+        },
+        "exception_contract": { "type": "object" },
+        "admission": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["prohibited_operational_statuses_until_approved", "required_gates", "decision_outcomes"],
+          "properties": {
+            "prohibited_operational_statuses_until_approved": {
+              "const": ["live", "current", "active", "chooseable", "useable"],
+              "type": "array"
+            },
+            "required_gates": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "uniqueItems": true,
+              "items": { "enum": [
+                "quirk_approval",
+                "procedures",
+                "processes",
+                "profiling",
+                "interoperability",
+                "security",
+                "statistical",
+                "lexical",
+                "quirk_pedantry",
+                "ship_it_without_bryan",
+                "separation_of_authority",
+                "migration_and_rollback"
+              ] }
+            },
+            "decision_outcomes": {
+              "const": ["approve", "revise", "reject", "supersede"],
+              "type": "array"
+            }
+          }
+        },
+        "runtime_failure_behavior": { "type": "object" }
+      }
+    }
+  },
+  "$defs": {
+    "Reference": { "minLength": 3, "maxLength": 512, "type": "string" },
+    "SemVer": {
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?$",
+      "type": "string"
+    },
+    "VersionedReference": {
+      "pattern": "^[a-z0-9][a-z0-9._-]*@(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "type": "string"
+    },
+    "Rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source_text",
+        "source_sha256",
+        "severity",
+        "interpretation",
+        "enforcement_layers",
+        "checks",
+        "exceptions",
+        "failure_effect"
+      ],
+      "properties": {
+        "id": { "pattern": "^ALR-(00[1-9]|010|011)$", "type": "string" },
+        "source_text": { "minLength": 1, "type": "string" },
+        "source_sha256": { "pattern": "^[a-f0-9]{64}$", "type": "string" },
+        "severity": { "enum": ["admission_blocker", "critical_control_blocker", "critical_runtime_blocker"] },
+        "interpretation": { "minLength": 1, "type": "string" },
+        "enforcement_layers": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/Reference" }
+        },
+        "checks": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/Reference" }
+        },
+        "exceptions": { "type": "array", "items": { "type": "object" } },
+        "failure_effect": { "$ref": "#/$defs/Reference" }
+      }
+    }
+  }
+}

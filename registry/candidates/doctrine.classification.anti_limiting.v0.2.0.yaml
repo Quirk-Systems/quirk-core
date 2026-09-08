@@ -1,0 +1,359 @@
+api_version: quirk.systems/v1alpha1
+kind: DoctrineCandidate
+
+metadata:
+  id: doctrine.classification.anti_limiting
+  version: 0.2.0
+  status: candidate
+  proposed_on: 2026-08-11
+  proposed_by: bryan
+  owner: quirk-core
+  supersedes:
+    - doctrine.classification.anti_limiting@0.1.0
+  revision_decision_ref: admission.decision.doctrine.classification.anti_limiting.revise.0001
+
+spec:
+  title: Eleven Anti-Limiting Rules
+  purpose: >-
+    Preserve open classification and expressive range while preventing hidden
+    semantic coupling, unsupported claims, authority leakage, provenance loss,
+    destructive history, and runtime dependence on invisible human context.
+  normative_authority: none_until_admitted
+  enforcement_mode: shadow_only
+  source_integrity:
+    encoding: UTF-8
+    normalization: none
+    hash_algorithm: sha256
+    mutation_policy: new_version_and_supersession_required
+  scope:
+    - object_registries
+    - schemas
+    - APIs
+    - agents
+    - interfaces
+    - imports
+    - code_projections
+    - database_projections
+    - permissions
+    - routing
+    - retention
+    - release
+
+  classification_axes:
+    required:
+      - identity
+      - purpose
+      - style
+      - state
+      - authority
+    authoritative_separation: required
+    cardinality:
+      identity: one_primary_plus_zero_or_more_roles
+      purpose: multiple
+      style: multiple_facets
+      state: one_or_more_declared_dimensions
+      authority: multiple_policy_and_principal_references
+    cross_axis_views:
+      allowed: true
+      authoritative: false
+      reversible: true
+      source_axes_required: true
+
+  rules:
+    - id: ALR-001
+      source_text: Never make one hierarchy carry identity, purpose, style, state, and authority.
+      source_sha256: 29685e78296c26e5582d63a8945329b74dc86c9a0f925e8e16b6f9ac9863a42a
+      severity: admission_blocker
+      interpretation: >-
+        The five axes must remain independently addressable and authoritative
+        across every representation; the source sentence does not permit a
+        structure to collapse any smaller subset of the axes.
+      enforcement_layers: [schema, semantic_validator, projection_test, adversarial_eval]
+      checks:
+        - five_axes_present
+        - axis_values_independently_mutable
+        - no_cross_axis_authority_inference
+        - composite_views_non_authoritative
+      exceptions: []
+      failure_effect: block_admission
+
+    - id: ALR-002
+      source_text: Do not treat intended effect as observed effect.
+      source_sha256: 8df881c9f547e1388b75854274fec99cc7c4c059ded4738e7a0a9c9a9d071d88
+      severity: admission_blocker
+      interpretation: >-
+        Intent and result claims are separate records. Observed results require
+        evidence, method, time, context, and epistemic kind; measurement alone
+        does not establish causality.
+      enforcement_layers: [schema, evidence_validator, claim_validator, adversarial_eval]
+      checks:
+        - intended_effects_separate
+        - observed_effects_have_evidence
+        - claim_kind_declared
+        - causal_claim_requires_attribution_evidence
+      exceptions: []
+      failure_effect: reject_claim
+
+    - id: ALR-003
+      source_text: Do not turn every useful adjective into a subtype.
+      source_sha256: de8206d1f3ff58e3161efba5ede18d7839e74722c4bc99513cd92f1c73366872
+      severity: admission_blocker
+      interpretation: >-
+        A subtype requires durable machine-checkable invariants, substitution
+        semantics, an interface or lifecycle distinction, or interoperability
+        necessity. Descriptions use governed facets; operational differences
+        use typed policy facts.
+      enforcement_layers: [proposal_schema, lexical_review, semantic_validator, adversarial_eval]
+      checks:
+        - subtype_invariant_present
+        - composition_alternative_assessed
+        - positive_and_negative_examples_present
+        - migration_impact_present
+      exceptions:
+        - exception_type: interoperability_required_subtype
+          authority_ref_required: true
+      failure_effect: convert_to_facet_proposal
+
+    - id: ALR-004
+      source_text: Do not let code inheritance define the ontology.
+      source_sha256: ad3a84dc881be1edfa58c8c1cd995c9bbbee174b8e0f06e97a2e39131e8171a0
+      severity: admission_blocker
+      interpretation: >-
+        Code classes and framework types are implementations or adapters of
+        language-neutral semantic contracts. Refactoring inheritance cannot
+        create, delete, or mutate canonical domain relationships.
+      enforcement_layers: [mapping_registry, projection_test, refactor_test, adversarial_eval]
+      checks:
+        - language_neutral_contract_exists
+        - code_mapping_explicit
+        - ontology_loads_without_application_classes
+        - inheritance_refactor_semantically_stable
+      exceptions: []
+      failure_effect: block_projection
+
+    - id: ALR-005
+      source_text: Do not promote imported terminology into canon without mappings and provenance.
+      source_sha256: 3ecafe6d3cdbfafa776d7bc4f6c4eff52baad845d1bab37fb9a30038cdad789d
+      severity: admission_blocker
+      interpretation: >-
+        Semantic origin determines import status even after renaming. Imported
+        concepts remain namespaced and non-canonical until their source,
+        version, use basis, semantic delta, collisions, mapping relation, and
+        steward are recorded and approved.
+      enforcement_layers: [import_validator, mapping_registry, provenance_validator, adversarial_eval]
+      checks:
+        - source_namespace_present
+        - source_version_present
+        - use_basis_present
+        - semantic_mapping_present
+        - collisions_recorded
+        - mapping_status_not_implicitly_canonical
+      exceptions: []
+      failure_effect: quarantine_import
+
+    - id: ALR-006
+      source_text: Do not erase rejected or superseded objects; preserve their decision history.
+      source_sha256: 9ee93f67f78f68aacf3dd1359e394552b7c415e39f7583ba6b717c8e85baa5f1
+      severity: admission_blocker
+      interpretation: >-
+        Preserve lawful lineage, disposition, rationale, authority, and
+        replacement relationships. Payload preservation is subordinate to
+        consent, privacy, safety, secret-removal, retention, and legal duties.
+      enforcement_layers: [history_store, disposition_validator, retention_policy, adversarial_eval]
+      checks:
+        - decision_record_preserved
+        - identifiers_not_reused
+        - replacement_links_resolve
+        - hard_delete_requires_erasure_authority
+        - minimum_lawful_audit_only
+      exceptions:
+        - exception_type: authorized_erasure
+          authority_ref_required: true
+          disposition_record_required: true
+        - exception_type: hazardous_payload_purge
+          authority_ref_required: true
+          disposition_record_required: true
+      failure_effect: block_disposition
+
+    - id: ALR-007
+      source_text: Do not use other where unknown, unclassified, novel, or not_applicable is more truthful.
+      source_sha256: 89c91d6ac38fd6f4a52133a7bbd7aa90728419e9435976ecd33cd18874768b97
+      severity: admission_blocker
+      interpretation: >-
+        Resolution and absence reasons must remain distinct and round-trip
+        without loss. Other is a qualified known residual value in a named
+        closed or external vocabulary, never a generic failure state.
+      enforcement_layers: [schema, resolution_validator, round_trip_test, adversarial_eval]
+      checks:
+        - resolution_state_explicit
+        - other_has_raw_value
+        - other_has_vocabulary_ref
+        - novel_has_taxonomy_and_mismatch_evidence
+        - null_sentinels_rejected
+      exceptions:
+        - exception_type: lossless_external_other
+          raw_value_required: true
+          vocabulary_ref_required: true
+      failure_effect: reject_classification
+
+    - id: ALR-008
+      source_text: Do not assume categories are mutually exclusive unless operational safety requires exclusivity.
+      source_sha256: e0c093a68887e243851940e55e96f3166944a8432bcb1e005796fd4d838c7652
+      severity: admission_blocker
+      interpretation: >-
+        Overlap is the default. Exclusivity requires a versioned policy that
+        declares cardinality, scope, time semantics, invariant kind, prevented
+        harm, authority, conflict behavior, and adversarial proof.
+      enforcement_layers: [schema, exclusivity_registry, UI_test, storage_round_trip_test, adversarial_eval]
+      checks:
+        - multi_value_default
+        - exclusivity_policy_present_when_enforced
+        - safety_or_integrity_rationale_present
+        - zero_and_multi_match_tests_present
+        - no_silent_last_write_wins
+      exceptions:
+        - exception_type: registered_exclusivity
+          authority_ref_required: true
+          evidence_refs_required: true
+      failure_effect: preserve_overlap_or_block
+
+    - id: ALR-009
+      source_text: Do not let tags control permissions, routing, retention, or release.
+      source_sha256: 64527c1222fb557912d12bc5f7c569568691b76ef35fc5d0c029c0d1346331a0
+      severity: critical_control_blocker
+      interpretation: >-
+        Unmanaged descriptive markers cannot directly or transitively determine
+        protected control behavior. Tags and Git references may address,
+        discover, or propose; typed authenticated policies authorize.
+      enforcement_layers: [policy_engine, authorization_test, mutation_test, adversarial_eval]
+      checks:
+        - tags_structurally_separate_from_controls
+        - tag_only_mutation_is_control_inert
+        - release_requires_authority_policy
+        - routing_requires_typed_policy
+        - retention_requires_typed_policy
+      exceptions: []
+      failure_effect: fail_closed
+
+    - id: ALR-010
+      source_text: Do not mutate historical classifications without versioning or supersession records.
+      source_sha256: 5b8e788ca6a286a38d826393d20ab86fa4d0b331f218ef37f8ba7207b02bdef0
+      severity: admission_blocker
+      interpretation: >-
+        Committed classification assertions are append-only. A material change
+        creates a new assertion with immutable predecessor, relation, actor,
+        authority, rationale, evidence, effective time, and recorded time.
+      enforcement_layers: [event_store, schema, migration_test, time_travel_test, adversarial_eval]
+      checks:
+        - predecessor_immutable
+        - supersession_relation_present
+        - effective_and_recorded_times_present
+        - historical_projection_reproducible
+        - migrations_emit_replacements
+      exceptions:
+        - exception_type: authorized_erasure
+          authority_ref_required: true
+          disposition_record_required: true
+      failure_effect: reject_mutation
+
+    - id: ALR-011
+      source_text: Do not require Bryan’s invisible interpretation to resolve a classification at runtime.
+      source_sha256: 3d5979121ce32f29dd6be0e178f999dab7e5f7a0385941284459bb860401e01f
+      severity: critical_runtime_blocker
+      interpretation: >-
+        Bryan is the named sentinel for any hidden human context. Runtime must
+        resolve from inspectable definitions, versions, evidence, procedures,
+        policies, authority, precedents, and uncertainty handling; otherwise it
+        must abstain and create a typed Proposed Move.
+      enforcement_layers: [clean_context_eval, decision_registry, abstention_test, adversarial_eval]
+      checks:
+        - visible_interpretation_basis_present
+        - clean_context_reproducible
+        - ambiguity_produces_typed_abstention
+        - proposed_move_created_when_decision_missing
+        - human_decision_recorded_when_exercised
+      exceptions: []
+      failure_effect: fail_closed_and_propose_move
+
+  resolution_states:
+    admitted:
+      - classified
+      - unknown
+      - unclassified
+      - novel
+      - not_applicable
+      - withheld
+      - redacted
+      - not_collected
+      - unavailable
+      - invalid
+      - ambiguous
+      - conflicting
+      - error
+    prohibited_as_resolution:
+      - other
+
+  claim_kinds:
+    - intended
+    - predicted
+    - simulated
+    - reported
+    - measured
+    - inferred
+    - causally_attributed
+
+  exception_contract:
+    required_fields:
+      - exception_id
+      - rule_id
+      - scope
+      - affected_object_refs
+      - justification
+      - evidence_refs
+      - requesting_capability_ref
+      - granting_authority_ref
+      - constraints
+      - compensating_controls
+      - valid_from
+      - review_or_expiry_condition
+      - revocation_procedure_ref
+      - resulting_decision_ref
+    invariants:
+      - capability_does_not_imply_authority
+      - tags_cannot_activate_exceptions
+      - exceptions_cannot_self_admit
+
+  admission:
+    prohibited_operational_statuses_until_approved:
+      - live
+      - current
+      - active
+      - chooseable
+      - useable
+    required_gates:
+      - quirk_approval
+      - procedures
+      - processes
+      - profiling
+      - interoperability
+      - security
+      - statistical
+      - lexical
+      - quirk_pedantry
+      - ship_it_without_bryan
+      - separation_of_authority
+      - migration_and_rollback
+    decision_outcomes:
+      - approve
+      - revise
+      - reject
+      - supersede
+
+  runtime_failure_behavior:
+    unsafe_default: fail_closed
+    unresolved_classification: typed_abstention
+    missing_decision: create_proposed_move
+    raw_input_retention: according_to_policy
+    hidden_context_reconstruction: prohibited
+
+

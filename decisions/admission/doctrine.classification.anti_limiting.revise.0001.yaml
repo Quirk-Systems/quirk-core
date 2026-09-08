@@ -1,0 +1,84 @@
+api_version: quirk.systems/governance/v1alpha1
+kind: AdmissionDecision
+decision_id: admission.decision.doctrine.classification.anti_limiting.revise.0001
+subject_ref: doctrine.classification.anti_limiting@0.1.0
+outcome: revise
+confidence: 0.98
+authority_ref: authority.quirk_core.candidate_review
+self_authorized: false
+evidence_refs:
+  - github.quirk-systems.quirk-core.pr.1@62b6125c23725c9b4bbee488d0619adb60bda883
+  - evidence.source_integrity.11_of_11_sha256
+  - evidence.ajv2020.strict_compile.failed
+  - evidence.fixtures.declared_22.executed_0
+  - evidence.schema.instances_valid_0_of_22
+  - evidence.gates.recorded_passes_0_of_12
+gate_results:
+  - gate: quirk_approval
+    status: fail
+    evidence_refs: [evidence.approval.signed_decision_missing]
+    finding: No signed admission decision or separately accountable granting authority is present.
+  - gate: procedures
+    status: fail
+    evidence_refs: [evidence.procedure.executable_runner_missing]
+    finding: The candidate names enforcement layers but supplies no executable admission procedure.
+  - gate: processes
+    status: fail
+    evidence_refs: [evidence.process.ci_status_missing]
+    finding: No required-check process records the twelve gates or blocks canon on their failure.
+  - gate: profiling
+    status: not_run
+    evidence_refs: []
+    finding: No profile corpus, coverage target, or execution record is supplied.
+  - gate: interoperability
+    status: fail
+    evidence_refs: [evidence.ajv2020.strict_compile.failed]
+    finding: The classification schema does not compile cleanly under strict Draft 2020-12 validation.
+  - gate: security
+    status: fail
+    evidence_refs: [evidence.schema.tag_control_loophole]
+    finding: A tag-shaped string can enter control references and capability-to-authority misuse is untested.
+  - gate: statistical
+    status: fail
+    evidence_refs: [evidence.fixtures.positive_controls_missing]
+    finding: Negative-only fixtures cannot detect a validator that rejects every input.
+  - gate: lexical
+    status: fail
+    evidence_refs:
+      - evidence.manifest.cardinality_contradiction
+      - evidence.manifest.status_vocabulary_contradiction
+    finding: Identity cardinality and resolution vocabulary contradict the stated doctrine and requested posture.
+  - gate: quirk_pedantry
+    status: fail
+    evidence_refs: [evidence.ajv2020.strict_warnings.38]
+    finding: Strict compilation emits 38 warnings and several conditional contracts admit trivial loopholes.
+  - gate: ship_it_without_bryan
+    status: not_run
+    evidence_refs: []
+    finding: No clean-context run proves resolution without Bryan's invisible interpretation.
+  - gate: separation_of_authority
+    status: fail
+    evidence_refs: [evidence.authority.self_admission_fixture_missing]
+    finding: The suite does not prove that evaluator capability cannot grant canon or runtime authority.
+  - gate: migration_and_rollback
+    status: fail
+    evidence_refs: [evidence.migration.executable_projection_missing]
+    finding: No append-only projection, verification query, or rollback procedure is executable.
+blockers:
+  - B-001 Strict Draft 2020-12 compilation is not clean.
+  - B-002 The 22 declared adversarial fixtures are data only; none is executed against an adapter.
+  - B-003 No positive controls prevent a reject-everything implementation from appearing compliant.
+  - B-004 Manifest cardinality, outcome vocabulary, and status vocabulary contradict the admission posture.
+  - B-005 Empty interpretation bases, tag-shaped controls, untyped moves, multiple identities, incomplete dispositions, imported terms without stewardship, and inverted time intervals are admitted or unproved.
+  - B-006 Self-admission and capability-versus-authority invariants are not tested.
+  - B-007 None of the twelve gates has an attributable pass record.
+minimum_changes:
+  - Add strict Draft 2020-12 schemas for the doctrine manifest, evaluation suite, decision record, and typed Proposed Move.
+  - Repair the classification schema loopholes and add a semantic time-order check.
+  - Add deterministic adapters and require exact result, disposition, and finding matches for all 22 adversarial fixtures.
+  - Add one positive control per rule plus cross-cutting authority, tag-exception, and Proposed Move tests.
+  - Resolve identity cardinality, remove defer from exhaustive outcomes, and normalize status vocabulary.
+  - Record all twelve gate results with evidence, evaluator capability, and separately accountable authority.
+  - Provide fail-closed Cloudflare and append-only Supabase projections with tests, verification, rollback, and no deployment authority.
+recorded_at: 2026-08-11T00:00:00Z
+next_candidate_ref: doctrine.classification.anti_limiting@0.2.0

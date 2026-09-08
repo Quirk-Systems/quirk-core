@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.quirk.systems/admission-decision/1-0-0.schema.json",
+  "title": "Quirk Admission Decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "api_version",
+    "kind",
+    "decision_id",
+    "subject_ref",
+    "outcome",
+    "confidence",
+    "authority_ref",
+    "self_authorized",
+    "evidence_refs",
+    "gate_results",
+    "blockers",
+    "minimum_changes",
+    "recorded_at"
+  ],
+  "properties": {
+    "api_version": { "const": "quirk.systems/governance/v1alpha1" },
+    "kind": { "const": "AdmissionDecision" },
+    "decision_id": {
+      "pattern": "^admission\\.decision\\.[a-z0-9][a-z0-9._-]*$",
+      "type": "string"
+    },
+    "subject_ref": { "$ref": "#/$defs/VersionedReference" },
+    "outcome": { "enum": ["approve", "revise", "reject", "supersede"] },
+    "confidence": { "maximum": 1, "minimum": 0, "type": "number" },
+    "authority_ref": { "$ref": "#/$defs/Reference" },
+    "self_authorized": { "const": false },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/Reference" }
+    },
+    "gate_results": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/GateResult" }
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "minLength": 1, "type": "string" }
+    },
+    "minimum_changes": {
+      "type": "array",
+      "items": { "minLength": 1, "type": "string" }
+    },
+    "recorded_at": { "format": "date-time", "type": "string" },
+    "next_candidate_ref": { "$ref": "#/$defs/VersionedReference" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": { "outcome": { "const": "revise" } },
+        "required": ["outcome"]
+      },
+      "then": {
+        "type": "object",
+        "required": ["next_candidate_ref"],
+        "properties": {
+          "next_candidate_ref": { "$ref": "#/$defs/VersionedReference" }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "Reference": { "minLength": 3, "maxLength": 512, "type": "string" },
+    "VersionedReference": {
+      "pattern": "^[a-z0-9][a-z0-9._-]*@(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "type": "string"
+    },
+    "GateResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gate", "status", "evidence_refs", "finding"],
+      "properties": {
+        "gate": { "enum": [
+          "quirk_approval",
+          "procedures",
+          "processes",
+          "profiling",
+          "interoperability",
+          "security",
+          "statistical",
+          "lexical",
+          "quirk_pedantry",
+          "ship_it_without_bryan",
+          "separation_of_authority",
+          "migration_and_rollback"
+        ] },
+        "status": { "enum": ["pass", "fail", "not_run"] },
+        "evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/Reference" }
+        },
+        "finding": { "minLength": 1, "type": "string" }
+      }
+    }
+  }
+}

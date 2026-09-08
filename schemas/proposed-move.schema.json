@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.quirk.systems/proposed-move/1-0-0.schema.json",
+  "title": "Quirk Proposed Move",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "move_id",
+    "subject_ref",
+    "reason",
+    "requested_capability_ref",
+    "status",
+    "operational_authority",
+    "created_at",
+    "evidence_refs"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "move_id": {
+      "pattern": "^proposed_move\\.[a-z0-9][a-z0-9._-]*$",
+      "type": "string"
+    },
+    "subject_ref": { "$ref": "#/$defs/Reference" },
+    "reason": { "minLength": 1, "type": "string" },
+    "requested_capability_ref": { "$ref": "#/$defs/Reference" },
+    "granting_authority_ref": { "$ref": "#/$defs/Reference" },
+    "status": { "enum": ["proposed", "approved", "rejected", "superseded"] },
+    "operational_authority": { "const": "none_until_separately_granted" },
+    "created_at": { "format": "date-time", "type": "string" },
+    "evidence_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/Reference" }
+    },
+    "resulting_decision_ref": { "$ref": "#/$defs/Reference" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": { "status": { "enum": ["approved", "rejected", "superseded"] } },
+        "required": ["status"]
+      },
+      "then": {
+        "type": "object",
+        "required": ["granting_authority_ref", "resulting_decision_ref"],
+        "properties": {
+          "granting_authority_ref": { "$ref": "#/$defs/Reference" },
+          "resulting_decision_ref": { "$ref": "#/$defs/Reference" }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "Reference": { "minLength": 3, "maxLength": 512, "type": "string" }
+  }
+}
