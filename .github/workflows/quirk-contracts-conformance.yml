@@ -1,5 +1,8 @@
 name: Quirk Contracts Conformance
 
+# Security requirement: all third-party GitHub Actions must be pinned to full-length commit SHAs.
+# This workflow follows the repository/org policy and should be used as the template for future workflows.
+
 on:
   pull_request:
   push:
