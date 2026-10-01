@@ -5,7 +5,7 @@
     "id": "tranche_constitutional_quality_v0_2",
     "version": "0.2.0",
     "status": "frozen",
-    "frozenDigest": "sha256:c0532f523ad415e3f996068486699d71b69c8b3aa0768e0c551ad25313c459b6"
+    "frozenDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
   },
   "contracts": [
     {"id":"contract_000","schema":"schemas/contract_000.schema.json","fixtureSet":"fixtures.json","expected":{"positive":"pass","negative":"fail","adversarial":"fail","exemplar":"pass"}},
