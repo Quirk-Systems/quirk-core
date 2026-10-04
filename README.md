@@ -6,6 +6,7 @@ Quirk Core holds shared meanings, contracts, and invariants. Quirk OS composes a
 
 - [Frozen constitutional and quality contracts v0.2](contracts/v0.2/README.md)
 - [Contract governance and required repository enforcement](docs/contracts/governance.md)
+- [Locked Python setup and reproducibility checks](docs/contracts/python-setup.md)
 - [September 10 working-intent reconciliation](docs/working-intent-2026-09-10.md)
 
 The reconciliation is a **review candidate**, not a contract amendment, deployment receipt, or claim of complete synchronization.
@@ -30,6 +31,6 @@ The existing conformance command is:
 python contracts/v0.2/check-contract-tranche.py
 ```
 
-Run it in the repository environment with the dependency declared by the conformance workflow. It checks the frozen digest and expected fixture outcomes; it does not verify repository-policy enforcement, deployed databases, user usefulness, or synchronization across applications.
+Run it in a clean Python 3.12 environment installed from `requirements-contracts.txt` with `--require-hashes`; see the [setup guide](docs/contracts/python-setup.md). It checks the frozen digest and expected fixture outcomes; it does not verify repository-policy enforcement, deployed databases, user usefulness, or synchronization across applications.
 
 Do not alter the frozen tranche, fixture expectations, digest, or workflow as an incidental synchronization edit. Follow the existing governance process for amendments.

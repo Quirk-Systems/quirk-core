@@ -20,14 +20,89 @@ jobs:
     name: frozen-contracts-v0.2
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+      VALIDATION_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
-      - name: Install validator dependency
-        run: python -m pip install --disable-pip-version-check 'jsonschema>=4.23,<5'
+      - name: Record checked revision and tool versions
+        run: |
+          git rev-parse HEAD
+          python --version
+          python -m pip --version
+          sha256sum requirements-contracts.txt
+      - name: Install hash-locked validator dependencies
+        run: |
+          python -m pip install --disable-pip-version-check --only-binary=:all: --require-hashes -r requirements-contracts.txt
+      - name: Verify dependency setup regressions
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
       - name: Verify frozen tranche digest and fixture outcomes
         run: python contracts/v0.2/check-contract-tranche.py
+      - name: Reproduce the exact head and reject invalid locks
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp=$(mktemp -d "$RUNNER_TEMP/quirk-contracts.XXXXXX")
+          trap 'rm -rf "$tmp"' EXIT
+          # Preserve the normal PR merge checkout above; independently prove its exact head.
+          test "${#VALIDATION_HEAD}" -eq 40
+          git cat-file -e "$VALIDATION_HEAD^{commit}"
+          mkdir "$tmp/head" "$tmp/wheels"
+          git archive "$VALIDATION_HEAD" | tar -x -C "$tmp/head"
+          lock="$tmp/head/requirements-contracts.txt"
+          echo "EXACT_HEAD=$VALIDATION_HEAD"
+          sha256sum "$lock"
+          python -m pip download --only-binary=:all: --require-hashes \
+            -r "$lock" --dest "$tmp/wheels"
+          for label in a b; do
+            python -m venv "$tmp/env-$label"
+            py="$tmp/env-$label/bin/python"
+            "$py" -m pip install --no-index --find-links="$tmp/wheels" \
+              --only-binary=:all: --require-hashes -r "$lock"
+            "$py" -m pip check
+            "$py" -m pip list --format=freeze > "$tmp/packages-$label.txt"
+            "$py" "$tmp/head/contracts/v0.2/check-contract-tranche.py" > "$tmp/checker-$label.txt"
+            cat "$tmp/checker-$label.txt"
+            "$py" -m unittest discover -s "$tmp/head/tests" -p 'test_*.py' -v
+          done
+          cmp "$tmp/checker-a.txt" "$tmp/checker-b.txt"
+          cmp "$tmp/packages-a.txt" "$tmp/packages-b.txt"
+          cat "$tmp/packages-a.txt"
+          echo 'PASS exact-head checker output and installed package parity'
+          # Negative controls operate only on temporary lock copies and cached wheels.
+          python - "$tmp" <<'PYCODE'
+          from pathlib import Path
+          import re
+          import sys
+          root = Path(sys.argv[1])
+          lock = (root / 'head/requirements-contracts.txt').read_text()
+          bad = re.sub(r'--hash=sha256:[0-9a-f]{64}', '--hash=sha256:' + '0' * 64, lock)
+          (root / 'wrong-hashes.txt').write_text(bad)
+          blocks = re.split(r'(?m)(?=^[A-Za-z0-9_.-]+==)', lock)
+          without_attrs = ''.join(block for block in blocks if not block.startswith('attrs=='))
+          if without_attrs == lock:
+              raise SystemExit('Missing negative-control dependency')
+          (root / 'missing-transitive.txt').write_text(without_attrs)
+          PYCODE
+          for control in wrong-hashes missing-transitive; do
+            if python -m pip download --no-index --no-cache-dir --find-links="$tmp/wheels" \
+                --only-binary=:all: --require-hashes -r "$tmp/$control.txt" \
+                --dest "$tmp/rejected-$control" > "$tmp/$control.log" 2>&1; then
+              echo "FAIL: accepted $control"
+              exit 1
+            fi
+          done
+          grep -q 'DO NOT MATCH THE HASHES' "$tmp/wrong-hashes.log"
+          grep -q 'must have their versions pinned' "$tmp/missing-transitive.log"
+          echo 'PASS wrong artifact hashes rejected'
+          echo 'PASS missing transitive dependency rejected'
+          git diff --exit-code -- contracts/v0.2 requirements-contracts.in requirements-contracts.txt
