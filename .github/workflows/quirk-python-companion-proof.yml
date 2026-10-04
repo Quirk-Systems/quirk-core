@@ -1,0 +1,125 @@
+name: Quirk Python Companion Proof
+
+# Candidate-branch proof only. No main writes, deployment, LLM, or policy changes.
+on:
+  push:
+    branches: [codex/quirk-python-companion-lock-20261003]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quirk-python-proof-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  baseline-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      BASE_SHA: b3162b0cd6dcc6c07570f240ca33c711ed860f0b
+      PYTHONDONTWRITEBYTECODE: '1'
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+    steps:
+      - name: Check out the exact inspected baseline
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: b3162b0cd6dcc6c07570f240ca33c711ed860f0b
+          persist-credentials: false
+          path: source
+      - name: Select the existing Python series
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.12'
+      - name: Prepare bounded proof directories and trusted Companion bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="$RUNNER_TEMP/quirk-python-proof"
+          mkdir -p "$ROOT/artifacts" "$ROOT/bundle"
+          echo "PROOF_ROOT=$ROOT" >> "$GITHUB_ENV"
+          python --version | tee "$ROOT/artifacts/python-version.txt"
+          git -C source rev-parse HEAD | tee "$ROOT/artifacts/base-sha.txt"
+          test "$(git -C source rev-parse HEAD)" = "$BASE_SHA"
+          git -C source archive --format=tar.gz --output="$ROOT/artifacts/quirk-core-base.tar.gz" HEAD
+          curl --fail --location --retry 2 --max-time 120 \
+            https://github.com/battle-doll/code-ontology-companion/releases/download/v0.6.0/code-ontology-companion-0.6.0.zip \
+            --output "$ROOT/artifacts/companion-0.6.0.zip"
+          echo "7c0e8f8daa9f4f5ddecce654a425c76c1d3dc664ba18651dc2050bcbb1d8f217  $ROOT/artifacts/companion-0.6.0.zip" | sha256sum --check
+          python - "$ROOT" <<'PY'
+          import hashlib, json, pathlib, stat, sys, zipfile
+          root = pathlib.Path(sys.argv[1])
+          dest = root / 'bundle'
+          with zipfile.ZipFile(root / 'artifacts/companion-0.6.0.zip') as archive:
+              for info in archive.infolist():
+                  target = (dest / info.filename).resolve()
+                  if not target.is_relative_to(dest.resolve()) or stat.S_ISLNK(info.external_attr >> 16):
+                      raise SystemExit('Unsafe archive entry')
+              archive.extractall(dest)
+          candidates = list(dest.rglob('skills/manage-code-ontology/scripts/companion.py'))
+          if len(candidates) != 1:
+              raise SystemExit(f'Expected exactly one trusted helper, found {len(candidates)}')
+          companion = candidates[0].resolve()
+          bundle = companion.parent.parent
+          receipt = {}
+          for name in ('companion.py', 'code_ontology_core.py', 'local_llm.py', 'code_reference.py'):
+              path = bundle / 'scripts' / name
+              if path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(bundle):
+                  raise SystemExit(f'Untrusted helper: {name}')
+              receipt[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+          (root / 'artifacts/companion-helper-sha256.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          with open(__import__('os').environ['GITHUB_ENV'], 'a') as handle:
+              handle.write(f'COMPANION={companion}\n')
+          PY
+      - name: Run Companion preflight and initialize the authorized outside-source workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          python "$COMPANION" doctor --repo "$GITHUB_WORKSPACE/source" | tee "$PROOF_ROOT/artifacts/companion-doctor.json"
+          python "$COMPANION" preflight --repo "$GITHUB_WORKSPACE/source" | tee "$PROOF_ROOT/artifacts/companion-preflight.json"
+          python "$COMPANION" init --repo "$GITHUB_WORKSPACE/source" --workspace "$PROOF_ROOT/workspace" --authorized | tee "$PROOF_ROOT/artifacts/companion-init.json"
+          python "$COMPANION" status --workspace "$PROOF_ROOT/workspace" | tee "$PROOF_ROOT/artifacts/companion-status.json"
+          python "$COMPANION" query --workspace "$PROOF_ROOT/workspace" --term main | tee "$PROOF_ROOT/artifacts/companion-query-main.json"
+          python "$COMPANION" query --workspace "$PROOF_ROOT/workspace" --term semantic | tee "$PROOF_ROOT/artifacts/companion-query-semantic.json"
+      - name: Establish the unchanged checker baseline and generate a candidate hash lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m venv "$PROOF_ROOT/tools"
+          "$PROOF_ROOT/tools/bin/python" -m pip install --only-binary=:all: uv==0.10.0
+          "$PROOF_ROOT/tools/bin/uv" --version | tee "$PROOF_ROOT/artifacts/uv-version.txt"
+          printf 'jsonschema>=4.23,<5\n' > "$PROOF_ROOT/artifacts/requirements-contracts.in"
+          "$PROOF_ROOT/tools/bin/uv" pip compile \
+            "$PROOF_ROOT/artifacts/requirements-contracts.in" \
+            --python-version 3.12 --generate-hashes --no-header \
+            --output-file "$PROOF_ROOT/artifacts/requirements-contracts.txt" \
+            > "$PROOF_ROOT/artifacts/lock-resolution.log" 2>&1
+          python -m venv "$PROOF_ROOT/baseline"
+          "$PROOF_ROOT/baseline/bin/python" -m pip install --only-binary=:all: 'jsonschema>=4.23,<5'
+          "$PROOF_ROOT/baseline/bin/python" source/contracts/v0.2/check-contract-tranche.py | tee "$PROOF_ROOT/artifacts/checker-baseline.txt"
+      - name: Reproduce in two clean locked environments
+        shell: bash
+        run: |
+          set -euo pipefail
+          for label in a b; do
+            python -m venv "$PROOF_ROOT/env-$label"
+            "$PROOF_ROOT/env-$label/bin/python" -m pip install --no-cache-dir --only-binary=:all: --require-hashes -r "$PROOF_ROOT/artifacts/requirements-contracts.txt"
+            "$PROOF_ROOT/env-$label/bin/python" -m pip check | tee "$PROOF_ROOT/artifacts/pip-check-$label.txt"
+            "$PROOF_ROOT/env-$label/bin/python" -m pip list --format=json > "$PROOF_ROOT/artifacts/packages-$label.json"
+            "$PROOF_ROOT/env-$label/bin/python" source/contracts/v0.2/check-contract-tranche.py | tee "$PROOF_ROOT/artifacts/checker-$label.txt"
+          done
+          cmp "$PROOF_ROOT/artifacts/checker-baseline.txt" "$PROOF_ROOT/artifacts/checker-a.txt"
+          cmp "$PROOF_ROOT/artifacts/checker-a.txt" "$PROOF_ROOT/artifacts/checker-b.txt"
+          cmp "$PROOF_ROOT/artifacts/packages-a.json" "$PROOF_ROOT/artifacts/packages-b.json"
+          git -C source diff --exit-code -- contracts/v0.2
+          git -C source status --porcelain | tee "$PROOF_ROOT/artifacts/source-status.txt"
+          test ! -s "$PROOF_ROOT/artifacts/source-status.txt"
+          sha256sum "$PROOF_ROOT/artifacts/requirements-contracts.txt" "$PROOF_ROOT/artifacts/checker-a.txt" | tee "$PROOF_ROOT/artifacts/proof-digests.txt"
+      - name: Retain setup receipts and public source/tool inputs, not private workspace manifests
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: quirk-python-baseline-${{ github.sha }}
+          path: ${{ runner.temp }}/quirk-python-proof/artifacts/
+          if-no-files-found: error
+          retention-days: 7
