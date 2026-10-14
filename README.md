@@ -4,6 +4,8 @@ Quirk Core holds shared meanings, contracts, and invariants. Quirk OS composes a
 
 ## Start here
 
+- [Cross-repo contract reconciliation candidate](docs/cross-repo-program.md)
+
 - [Frozen constitutional and quality contracts v0.2](contracts/v0.2/README.md)
 - [Contract governance and required repository enforcement](docs/contracts/governance.md)
 - [September 10 working-intent reconciliation](docs/working-intent-2026-09-10.md)
