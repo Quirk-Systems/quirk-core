@@ -33,3 +33,9 @@ python contracts/v0.2/check-contract-tranche.py
 Run it in the repository environment with the dependency declared by the conformance workflow. It checks the frozen digest and expected fixture outcomes; it does not verify repository-policy enforcement, deployed databases, user usefulness, or synchronization across applications.
 
 Do not alter the frozen tranche, fixture expectations, digest, or workflow as an incidental synchronization edit. Follow the existing governance process for amendments.
+
+## Context continuity
+
+For changes involving context, preferences, creative work, or participation, read
+[QUIRK-CONTEXT.md](QUIRK-CONTEXT.md) and preserve its scoped requirements.
+Do not treat this instruction entry point as proof of host loading or runtime adoption.
